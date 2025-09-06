@@ -4,7 +4,7 @@ namespace csharp_aspnetcore_sample.Models;
 
 public class Listing
 {
-    public int ListingId { get; set; }
+    public Guid ListingId { get; set; }
 
     [Required]
     [StringLength(100)]

@@ -8,7 +8,6 @@ namespace csharp_aspnetcore_sample.Controllers;
 public class ListingsController : ControllerBase
 {
     private static readonly List<Listing> _listings = new();
-    private static int _nextId = 1;
 
     // GET: api/listings
     [HttpGet]
@@ -22,9 +21,9 @@ public class ListingsController : ControllerBase
         return Ok(listings);
     }
 
-    // GET: api/listings/5
+    // GET: api/listings/{guid}
     [HttpGet("{id}")]
-    public ActionResult<Listing> GetListing(int id)
+    public ActionResult<Listing> GetListing(Guid id)
     {
         var listing = _listings.FirstOrDefault(p => p.ListingId == id);
         
@@ -40,7 +39,7 @@ public class ListingsController : ControllerBase
     [HttpPost]
     public ActionResult<Listing> CreateListing(Listing listing)
     {
-        listing.ListingId = _nextId++;
+        listing.ListingId = Guid.NewGuid();
         _listings.Add(listing);
 
         return CreatedAtAction(
@@ -49,9 +48,9 @@ public class ListingsController : ControllerBase
             listing);
     }
 
-    // PUT: api/listings/5
+    // PUT: api/listings/{guid}
     [HttpPut("{id}")]
-    public IActionResult UpdateListing(int id, Listing listing)
+    public IActionResult UpdateListing(Guid id, Listing listing)
     {
         if (id != listing.ListingId)
         {
@@ -70,9 +69,9 @@ public class ListingsController : ControllerBase
         return NoContent();
     }
 
-    // DELETE: api/listings/5
+    // DELETE: api/listings/{guid}
     [HttpDelete("{id}")]
-    public IActionResult DeleteListing(int id)
+    public IActionResult DeleteListing(Guid id)
     {
         var listing = _listings.FirstOrDefault(p => p.ListingId == id);
         if (listing == null)
