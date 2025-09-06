@@ -1,6 +1,41 @@
 using System.ComponentModel.DataAnnotations;
+using System.Runtime.Serialization;
 
 namespace csharp_aspnetcore_sample.Models;
+
+public enum Category
+{
+    [EnumMember(Value = "Electronics")]
+    Electronics,
+    [EnumMember(Value = "Fashion")]
+    Fashion,
+    [EnumMember(Value = "Home & Garden")]
+    HomeAndGarden,
+    [EnumMember(Value = "Motors")]
+    Motors,
+    [EnumMember(Value = "Collectibles & Art")]
+    CollectiblesAndArt,
+    [EnumMember(Value = "Sporting Goods")]
+    SportingGoods,
+    [EnumMember(Value = "Toys & Hobbies")]
+    ToysAndHobbies,
+    [EnumMember(Value = "Business & Industrial")]
+    BusinessAndIndustrial,
+    [EnumMember(Value = "Music")]
+    Music,
+    [EnumMember(Value = "Health & Beauty")]
+    HealthAndBeauty,
+    [EnumMember(Value = "Books")]
+    Books,
+    [EnumMember(Value = "Cameras & Photo")]
+    CamerasAndPhoto,
+    [EnumMember(Value = "Computers, Tablets & Networking")]
+    ComputersTabletsAndNetworking,
+    [EnumMember(Value = "Cell Phones & Accessories")]
+    CellPhonesAndAccessories,
+    [EnumMember(Value = "Video Games & Consoles")]
+    VideoGamesAndConsoles
+}
 
 public class Listing
 {
@@ -17,7 +52,7 @@ public class Listing
     public Price Price { get; set; } = new();
 
     [Required]
-    public string Category { get; set; } = string.Empty;
+    public Category Category { get; set; }
 }
 
 public class Price
