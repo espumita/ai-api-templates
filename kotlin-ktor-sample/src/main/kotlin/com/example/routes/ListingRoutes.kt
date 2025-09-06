@@ -37,7 +37,7 @@ fun Route.listingRoutes(listingService: ListingService) {
             //     OpenApiResponse(status = "400", description = "Invalid page or pageSize parameters")
             //   ]
             // )
-            val page = call.request.queryParameters["page"]?.toIntOrNull() ?: 0
+            val page = (call.request.queryParameters["page"]?.toIntOrNull() ?: 1) - 1  // Convert 1-based to 0-based
             val pageSize = call.request.queryParameters["pageSize"]?.toIntOrNull() ?: 10
             val listings = listingService.getAllListings(page, pageSize)
             call.respond(listings)

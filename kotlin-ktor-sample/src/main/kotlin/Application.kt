@@ -34,7 +34,12 @@ fun Application.module() {
 
     // Configure JSON serialization
     install(ContentNegotiation) {
-        jackson()
+        jackson {
+            // Enable pretty printing for development
+            enable(com.fasterxml.jackson.databind.SerializationFeature.INDENT_OUTPUT)
+            // Prevent failure on empty beans
+            disable(com.fasterxml.jackson.databind.SerializationFeature.FAIL_ON_EMPTY_BEANS)
+        }
     }
 
     // Initialize services
