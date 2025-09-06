@@ -25,28 +25,44 @@ The API should support full CRUD (Create, Read, Update, Delete) operations for l
 
 #### Required API Endpoints
 
-Each implementation should provide the following endpoints:
+Each implementation should provide the following endpoints with their respective response codes:
 
 1. **Create Listing**
    - POST /api/listings
    - Creates a new listing
+   - Response codes:
+     - 201 Created: Listing created successfully
+     - 400 Bad Request: Invalid listing data
 
 2. **Get All Listings**
    - GET /api/listings
    - Returns all available listings
    - Should support pagination and filtering
+   - Response codes:
+     - 200 OK: Successful response with listings
+     - 400 Bad Request: Invalid page or pageSize parameters
 
 3. **Get Single Listing**
    - GET /api/listings/{id}
    - Returns details for a specific listing
+   - Response codes:
+     - 200 OK: Successful response with listing details
+     - 404 Not Found: Listing not found
 
 4. **Update Listing**
    - PUT /api/listings/{id}
    - Updates an existing listing
+   - Response codes:
+     - 204 No Content: Listing updated successfully
+     - 400 Bad Request: Invalid data or ID mismatch
+     - 404 Not Found: Listing not found
 
 5. **Delete Listing**
    - DELETE /api/listings/{id}
    - Removes a listing
+   - Response codes:
+     - 204 No Content: Listing deleted successfully
+     - 404 Not Found: Listing not found
 
 #### API Examples
 
