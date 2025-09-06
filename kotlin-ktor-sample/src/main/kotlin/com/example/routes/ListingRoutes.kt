@@ -12,6 +12,13 @@ fun Route.listingRoutes(listingService: ListingService) {
     route("/api/listings") {
         // Create listing
         post {
+            // @OpenAPI(
+            //   summary = "Create a new listing",
+            //   responses = [
+            //     OpenApiResponse(status = "201", description = "Listing created successfully"),
+            //     OpenApiResponse(status = "400", description = "Invalid listing data")
+            //   ]
+            // )
             try {
                 val listing = call.receive<Listing>()
                 val createdListing = listingService.createListing(listing)
@@ -23,6 +30,13 @@ fun Route.listingRoutes(listingService: ListingService) {
 
         // Get all listings with pagination
         get {
+            // @OpenAPI(
+            //   summary = "Get all listings with pagination",
+            //   responses = [
+            //     OpenApiResponse(status = "200", description = "Successful response with listings"),
+            //     OpenApiResponse(status = "400", description = "Invalid page or pageSize parameters")
+            //   ]
+            // )
             val page = call.request.queryParameters["page"]?.toIntOrNull() ?: 0
             val pageSize = call.request.queryParameters["pageSize"]?.toIntOrNull() ?: 10
             val listings = listingService.getAllListings(page, pageSize)
@@ -31,6 +45,13 @@ fun Route.listingRoutes(listingService: ListingService) {
 
         // Get single listing
         get("{id}") {
+            // @OpenAPI(
+            //   summary = "Get listing by ID",
+            //   responses = [
+            //     OpenApiResponse(status = "200", description = "Successful response with listing details"),
+            //     OpenApiResponse(status = "404", description = "Listing not found")
+            //   ]
+            // )
             val id = call.parameters["id"] ?: return@get call.respond(HttpStatusCode.BadRequest)
             val listing = listingService.getListing(id)
             if (listing != null) {
@@ -42,12 +63,20 @@ fun Route.listingRoutes(listingService: ListingService) {
 
         // Update listing
         put("{id}") {
+            // @OpenAPI(
+            //   summary = "Update listing by ID",
+            //   responses = [
+            //     OpenApiResponse(status = "204", description = "Listing updated successfully"),
+            //     OpenApiResponse(status = "400", description = "Invalid data or ID mismatch"),
+            //     OpenApiResponse(status = "404", description = "Listing not found")
+            //   ]
+            // )
             val id = call.parameters["id"] ?: return@put call.respond(HttpStatusCode.BadRequest)
             try {
                 val listing = call.receive<Listing>()
                 val updatedListing = listingService.updateListing(id, listing)
                 if (updatedListing != null) {
-                    call.respond(updatedListing)
+                    call.respond(HttpStatusCode.NoContent)
                 } else {
                     call.respond(HttpStatusCode.NotFound, mapOf("error" to "Listing not found"))
                 }
@@ -58,6 +87,13 @@ fun Route.listingRoutes(listingService: ListingService) {
 
         // Delete listing
         delete("{id}") {
+            // @OpenAPI(
+            //   summary = "Delete listing by ID",
+            //   responses = [
+            //     OpenApiResponse(status = "204", description = "Listing deleted successfully"),
+            //     OpenApiResponse(status = "404", description = "Listing not found")
+            //   ]
+            // )
             val id = call.parameters["id"] ?: return@delete call.respond(HttpStatusCode.BadRequest)
             if (listingService.deleteListing(id)) {
                 call.respond(HttpStatusCode.NoContent)

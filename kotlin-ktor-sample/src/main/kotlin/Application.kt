@@ -10,6 +10,8 @@ import io.ktor.server.plugins.openapi.*
 import io.ktor.server.plugins.swagger.*
 import io.ktor.server.routing.*
 import io.ktor.http.*
+import io.ktor.server.engine.embeddedServer
+import io.ktor.server.netty.Netty
 
 fun main(args: Array<String>) {
     io.ktor.server.netty.EngineMain.main(args)
@@ -40,8 +42,8 @@ fun Application.module() {
 
     // Configure OpenAPI and Swagger
     routing {
-        openAPI(path = "openapi", swaggerFile = "openapi.yaml")
-        swaggerUI(path = "swagger", swaggerFile = "openapi.yaml")
+        openAPI(path = "openapi", swaggerFile = "openapi/documentation.yaml")
+        swaggerUI(path = "swagger", swaggerFile = "openapi/documentation.yaml")
     }
 
     // Configure routing
