@@ -2,8 +2,8 @@
 
 This repository contains example projects implementing a simple marketplace API in different programming languages. Currently, it includes:
 
-- C# ASP.NET Core implementation
-- Kotlin Ktor implementation
+- C# ASP.NET Core implementation (`csharp-aspnetcore-sample/`)
+- Kotlin Ktor implementation (`kotlin-ktor-sample/`)
 
 ## Project Overview
 
