@@ -1,0 +1,72 @@
+# Visual Studio
+.vs/
+*.user
+*.suo
+*.userosscache
+*.sln.docstates
+
+# Build results
+[Dd]ebug/
+[Rr]elease/
+x64/
+x86/
+build/
+bld/
+[Bb]in/
+[Oo]bj/
+
+# Rider
+.idea/
+
+# Visual Studio Code
+.vscode/
+
+# NuGet
+*.nupkg
+packages/
+# The packages folder can be ignored because of PackageReference restore
+**/packages/*
+
+# Resharper
+_ReSharper*/
+*.DotSettings.user
+
+# ASP.NET Scaffolding
+ScaffoldingReadMe.txt
+
+# DotCover
+*.dotCover
+
+# MSTest test results
+TestResults/
+*.trx
+*.coverage
+*.coveragexml
+
+# NCrunch
+_NCrunch_*
+.*crunch*.local.xml
+
+# StyleCop
+StyleCopReport.xml
+
+# Files built by Visual Studio
+*.dll
+*.exe
+*.pdb
+*.cache
+*.ilk
+*.log
+*.obj
+*.meta
+
+# Others
+*.pidb
+*.scc
+*.userprefs
+*.dbmdl
+*.bak
+*.backup
+*.swp
+*.tmp
+*.temp
