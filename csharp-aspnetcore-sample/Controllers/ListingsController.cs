@@ -12,9 +12,9 @@ public class ListingsController : ControllerBase
 
     // GET: api/listings
     [HttpGet]
-    [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(IEnumerable<Listing>))]
+    [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(PaginatedListingsResponse))]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
-    public ActionResult<IEnumerable<Listing>> GetListings([FromQuery] int page = 1, [FromQuery] int pageSize = 10)
+    public ActionResult<PaginatedListingsResponse> GetListings([FromQuery] int page = 1, [FromQuery] int pageSize = 10)
     {
         if (page < 1 || pageSize < 1)
         {
@@ -26,7 +26,15 @@ public class ListingsController : ControllerBase
             .Take(pageSize)
             .ToList();
 
-        return Ok(listings);
+        var response = new PaginatedListingsResponse
+        {
+            Items = listings,
+            TotalItems = _listings.Count,
+            Page = page,
+            PageSize = pageSize
+        };
+
+        return Ok(response);
     }
 
     // GET: api/listings/{guid}
@@ -67,10 +75,10 @@ public class ListingsController : ControllerBase
 
     // PUT: api/listings/{guid}
     [HttpPut("{id}")]
-    [ProducesResponseType(StatusCodes.Status204NoContent)]
+    [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(Listing))]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
-    public IActionResult UpdateListing(Guid id, Listing listing)
+    public ActionResult<Listing> UpdateListing(Guid id, Listing listing)
     {
         if (!ModelState.IsValid)
         {
@@ -91,7 +99,7 @@ public class ListingsController : ControllerBase
         var index = _listings.IndexOf(existingListing);
         _listings[index] = listing;
 
-        return NoContent();
+        return Ok(listing);
     }
 
     // DELETE: api/listings/{guid}

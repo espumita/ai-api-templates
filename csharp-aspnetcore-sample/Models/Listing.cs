@@ -53,6 +53,9 @@ public class Listing
 
     [Required]
     public Category Category { get; set; }
+
+    [Required]
+    public Location Location { get; set; } = new();
 }
 
 public class Price
@@ -64,4 +67,26 @@ public class Price
     [Required]
     [Range(0.01, double.MaxValue, ErrorMessage = "Amount must be greater than 0")]
     public decimal Amount { get; set; }
+}
+
+public class Location
+{
+    [Required]
+    [StringLength(2, MinimumLength = 2, ErrorMessage = "Country must be a valid ISO 3166 2-character code")]
+    public string Country { get; set; } = string.Empty;
+
+    [Required]
+    public string Municipality { get; set; } = string.Empty;
+
+    [Required]
+    [StringLength(7, MinimumLength = 7, ErrorMessage = "Geohash must be exactly 7 characters")]
+    public string Geohash { get; set; } = string.Empty;
+}
+
+public class PaginatedListingsResponse
+{
+    public IEnumerable<Listing> Items { get; set; } = new List<Listing>();
+    public int TotalItems { get; set; }
+    public int Page { get; set; }
+    public int PageSize { get; set; }
 }

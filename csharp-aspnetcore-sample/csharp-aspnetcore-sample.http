@@ -4,3 +4,63 @@ GET {{csharp_aspnetcore_sample_HostAddress}}/weatherforecast/
 Accept: application/json
 
 ###
+
+# Create a new listing
+POST {{csharp_aspnetcore_sample_HostAddress}}/api/listings
+Content-Type: application/json
+
+{
+  "name": "Vintage Guitar",
+  "description": "1970s Fender Stratocaster in excellent condition",
+  "price": {
+    "currency": "USD",
+    "amount": 1299.99
+  },
+  "category": "Music",
+  "location": {
+    "country": "US",
+    "municipality": "Austin",
+    "geohash": "dr5regw"
+  }
+}
+
+###
+
+# Get all listings with pagination
+GET {{csharp_aspnetcore_sample_HostAddress}}/api/listings?page=1&pageSize=10
+Accept: application/json
+
+###
+
+# Get a specific listing (replace with actual GUID after creating one)
+GET {{csharp_aspnetcore_sample_HostAddress}}/api/listings/123e4567-e89b-12d3-a456-426614174000
+Accept: application/json
+
+###
+
+# Update a listing (replace with actual GUID after creating one)
+PUT {{csharp_aspnetcore_sample_HostAddress}}/api/listings/123e4567-e89b-12d3-a456-426614174000
+Content-Type: application/json
+
+{
+  "listingId": "123e4567-e89b-12d3-a456-426614174000",
+  "name": "Vintage Guitar",
+  "description": "1970s Fender Stratocaster in mint condition",
+  "price": {
+    "currency": "USD",
+    "amount": 1399.99
+  },
+  "category": "Music",
+  "location": {
+    "country": "US",
+    "municipality": "Austin",
+    "geohash": "dr5regw"
+  }
+}
+
+###
+
+# Delete a listing (replace with actual GUID after creating one)
+DELETE {{csharp_aspnetcore_sample_HostAddress}}/api/listings/123e4567-e89b-12d3-a456-426614174000
+
+###
