@@ -66,7 +66,7 @@ fun Route.listingRoutes(listingService: ListingService) {
             // @OpenAPI(
             //   summary = "Update listing by ID",
             //   responses = [
-            //     OpenApiResponse(status = "204", description = "Listing updated successfully"),
+            //     OpenApiResponse(status = "200", description = "Listing updated successfully with the updated listing object"),
             //     OpenApiResponse(status = "400", description = "Invalid data or ID mismatch"),
             //     OpenApiResponse(status = "404", description = "Listing not found")
             //   ]
@@ -76,7 +76,7 @@ fun Route.listingRoutes(listingService: ListingService) {
                 val listing = call.receive<Listing>()
                 val updatedListing = listingService.updateListing(id, listing)
                 if (updatedListing != null) {
-                    call.respond(HttpStatusCode.NoContent)
+                    call.respond(HttpStatusCode.OK, updatedListing)
                 } else {
                     call.respond(HttpStatusCode.NotFound, mapOf("error" to "Listing not found"))
                 }

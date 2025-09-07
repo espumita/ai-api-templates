@@ -53,7 +53,7 @@ Each implementation should provide the following endpoints with their respective
    - PUT /api/listings/{id}
    - Updates an existing listing
    - Response codes:
-     - 204 No Content: Listing updated successfully
+     - 200 OK: Listing updated successfully with the updated listing object
      - 400 Bad Request: Invalid data or ID mismatch
      - 404 Not Found: Listing not found
 
