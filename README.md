@@ -4,9 +4,18 @@ This repository contains AI-generated example implementations of a marketplace A
 
 Each implementation follows the same API specification while adhering to language-specific best practices.
 
+## Available Implementations
+
+- **C# ASP.NET Core** (`csharp-aspnetcore-sample/`) 
+- **Kotlin Ktor** (`kotlin-ktor-sample/`)
+
 ## Documentation
 
 For detailed API specifications, data models, and implementation guidelines, see [copilot-instructions.md](.github/copilot-instructions.md).
+
+## Docker Support
+
+Both implementations include Docker support for easy deployment.
 
 ## Note
 
