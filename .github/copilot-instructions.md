@@ -22,6 +22,7 @@ The API should support full CRUD (Create, Read, Update, Delete) operations for l
 | Description | Detailed description of the listing |
 | Price | Object containing currency and amount fields |
 | Category | Must be one of: "Electronics", "Fashion", "Home & Garden", "Motors", "Collectibles & Art", "Sporting Goods", "Toys & Hobbies", "Business & Industrial", "Music", "Health & Beauty", "Books", "Cameras & Photo", "Computers, Tablets & Networking", "Cell Phones & Accessories", "Video Games & Consoles" |
+| Location | Object containing country, municipality, and geohash fields for geographic location |
 
 #### Required API Endpoints
 
@@ -79,7 +80,12 @@ curl -X POST http://localhost:8080/api/listings `
       "currency": "USD",
       "amount": 1299.99
     },
-    "category": "Music"
+    "category": "Music",
+    "location": {
+      "country": "United States",
+      "municipality": "Austin",
+      "geohash": "dr5regw"
+    }
   }'
 ```
 Response (201 Created):
@@ -92,7 +98,12 @@ Response (201 Created):
     "currency": "USD",
     "amount": 1299.99
   },
-  "category": "Music"
+  "category": "Music",
+  "location": {
+    "country": "United States",
+    "municipality": "Austin",
+    "geohash": "dr5regw"
+  }
 }
 ```
 
@@ -114,7 +125,12 @@ Response (200 OK):
         "currency": "USD",
         "amount": 1299.99
       },
-      "category": "Music"
+      "category": "Music",
+      "location": {
+        "country": "United States",
+        "municipality": "Austin",
+        "geohash": "dr5regw"
+      }
     }
   ],
   "totalItems": 1,
@@ -137,7 +153,12 @@ Response (200 OK):
     "currency": "USD",
     "amount": 1299.99
   },
-  "category": "Music"
+  "category": "Music",
+  "location": {
+    "country": "United States",
+    "municipality": "Austin",
+    "geohash": "dr5regw"
+  }
 }
 ```
 
@@ -152,7 +173,12 @@ curl -X PUT http://localhost:8080/api/listings/123e4567-e89b-12d3-a456-426614174
       "currency": "USD",
       "amount": 1399.99
     },
-    "category": "Music"
+    "category": "Music",
+    "location": {
+      "country": "United States",
+      "municipality": "Austin",
+      "geohash": "dr5regw"
+    }
   }'
 ```
 Response (200 OK):
@@ -165,7 +191,12 @@ Response (200 OK):
     "currency": "USD",
     "amount": 1399.99
   },
-  "category": "Music"
+  "category": "Music",
+  "location": {
+    "country": "United States",
+    "municipality": "Austin",
+    "geohash": "dr5regw"
+  }
 }
 ```
 
