@@ -1,35 +1,42 @@
 package com.example.services
 
 import com.example.models.Listing
-import java.util.concurrent.ConcurrentHashMap
+import com.example.models.PaginatedListingsResponse
+import com.example.repositories.IListingRepository
+import java.util.UUID
 
-class ListingService {
-    private val listings = ConcurrentHashMap<String, Listing>()
+class ListingService(private val listingRepository: IListingRepository) {
 
-    fun createListing(listing: Listing): Listing {
-        listings[listing.listingId] = listing
-        return listing
+    suspend fun createListing(listing: Listing): Listing {
+        return listingRepository.createAsync(listing)
     }
 
-    fun getListing(id: String): Listing? = listings[id]
+    suspend fun getListing(id: UUID): Listing? {
+        return listingRepository.getByIdAsync(id)
+    }
 
-    fun getAllListings(page: Int, pageSize: Int): Map<String, Any> {
-        val startIndex = page * pageSize
-        val items = listings.values.drop(startIndex).take(pageSize).toList()
-        return mapOf(
-            "items" to items,
-            "totalItems" to listings.size,
-            "page" to page,
-            "pageSize" to pageSize
+    suspend fun getAllListings(page: Int, pageSize: Int): PaginatedListingsResponse {
+        val items = listingRepository.getAllAsync(page, pageSize)
+        val totalItems = listingRepository.getTotalCountAsync()
+        
+        return PaginatedListingsResponse(
+            items = items,
+            totalItems = totalItems,
+            page = page,
+            pageSize = pageSize
         )
     }
 
-    fun updateListing(id: String, listing: Listing): Listing? {
-        if (!listings.containsKey(id)) return null
+    suspend fun updateListing(id: UUID, listing: Listing): Listing? {
         val updatedListing = listing.copy(listingId = id)
-        listings[id] = updatedListing
-        return updatedListing
+        return listingRepository.updateAsync(updatedListing)
     }
 
-    fun deleteListing(id: String): Boolean = listings.remove(id) != null
+    suspend fun deleteListing(id: UUID): Boolean {
+        return listingRepository.deleteAsync(id)
+    }
+
+    suspend fun listingExists(id: UUID): Boolean {
+        return listingRepository.existsAsync(id)
+    }
 }

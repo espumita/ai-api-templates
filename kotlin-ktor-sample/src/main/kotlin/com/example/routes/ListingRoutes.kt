@@ -7,6 +7,7 @@ import io.ktor.server.application.*
 import io.ktor.server.request.*
 import io.ktor.server.response.*
 import io.ktor.server.routing.*
+import java.util.UUID
 
 fun Route.listingRoutes(listingService: ListingService) {
     route("/api/listings") {
@@ -25,6 +26,8 @@ fun Route.listingRoutes(listingService: ListingService) {
                 call.respond(HttpStatusCode.Created, createdListing)
             } catch (e: IllegalArgumentException) {
                 call.respond(HttpStatusCode.BadRequest, mapOf("error" to e.message))
+            } catch (e: Exception) {
+                call.respond(HttpStatusCode.InternalServerError, mapOf("error" to "Failed to create listing"))
             }
         }
 
@@ -37,10 +40,20 @@ fun Route.listingRoutes(listingService: ListingService) {
             //     OpenApiResponse(status = "400", description = "Invalid page or pageSize parameters")
             //   ]
             // )
-            val page = (call.request.queryParameters["page"]?.toIntOrNull() ?: 1) - 1  // Convert 1-based to 0-based
-            val pageSize = call.request.queryParameters["pageSize"]?.toIntOrNull() ?: 10
-            val listings = listingService.getAllListings(page, pageSize)
-            call.respond(listings)
+            try {
+                val page = call.request.queryParameters["page"]?.toIntOrNull() ?: 1
+                val pageSize = call.request.queryParameters["pageSize"]?.toIntOrNull() ?: 10
+                
+                if (page < 1 || pageSize < 1) {
+                    call.respond(HttpStatusCode.BadRequest, mapOf("error" to "Invalid page or pageSize parameters"))
+                    return@get
+                }
+                
+                val listings = listingService.getAllListings(page, pageSize)
+                call.respond(listings)
+            } catch (e: Exception) {
+                call.respond(HttpStatusCode.InternalServerError, mapOf("error" to "Failed to retrieve listings"))
+            }
         }
 
         // Get single listing
@@ -52,12 +65,19 @@ fun Route.listingRoutes(listingService: ListingService) {
             //     OpenApiResponse(status = "404", description = "Listing not found")
             //   ]
             // )
-            val id = call.parameters["id"] ?: return@get call.respond(HttpStatusCode.BadRequest)
-            val listing = listingService.getListing(id)
-            if (listing != null) {
-                call.respond(listing)
-            } else {
-                call.respond(HttpStatusCode.NotFound, mapOf("error" to "Listing not found"))
+            try {
+                val idString = call.parameters["id"] ?: return@get call.respond(HttpStatusCode.BadRequest)
+                val id = UUID.fromString(idString)
+                val listing = listingService.getListing(id)
+                if (listing != null) {
+                    call.respond(listing)
+                } else {
+                    call.respond(HttpStatusCode.NotFound, mapOf("error" to "Listing not found"))
+                }
+            } catch (e: IllegalArgumentException) {
+                call.respond(HttpStatusCode.BadRequest, mapOf("error" to "Invalid UUID format"))
+            } catch (e: Exception) {
+                call.respond(HttpStatusCode.InternalServerError, mapOf("error" to "Failed to retrieve listing"))
             }
         }
 
@@ -71,8 +91,9 @@ fun Route.listingRoutes(listingService: ListingService) {
             //     OpenApiResponse(status = "404", description = "Listing not found")
             //   ]
             // )
-            val id = call.parameters["id"] ?: return@put call.respond(HttpStatusCode.BadRequest)
             try {
+                val idString = call.parameters["id"] ?: return@put call.respond(HttpStatusCode.BadRequest)
+                val id = UUID.fromString(idString)
                 val listing = call.receive<Listing>()
                 val updatedListing = listingService.updateListing(id, listing)
                 if (updatedListing != null) {
@@ -82,6 +103,8 @@ fun Route.listingRoutes(listingService: ListingService) {
                 }
             } catch (e: IllegalArgumentException) {
                 call.respond(HttpStatusCode.BadRequest, mapOf("error" to e.message))
+            } catch (e: Exception) {
+                call.respond(HttpStatusCode.InternalServerError, mapOf("error" to "Failed to update listing"))
             }
         }
 
@@ -94,11 +117,18 @@ fun Route.listingRoutes(listingService: ListingService) {
             //     OpenApiResponse(status = "404", description = "Listing not found")
             //   ]
             // )
-            val id = call.parameters["id"] ?: return@delete call.respond(HttpStatusCode.BadRequest)
-            if (listingService.deleteListing(id)) {
-                call.respond(HttpStatusCode.NoContent)
-            } else {
-                call.respond(HttpStatusCode.NotFound, mapOf("error" to "Listing not found"))
+            try {
+                val idString = call.parameters["id"] ?: return@delete call.respond(HttpStatusCode.BadRequest)
+                val id = UUID.fromString(idString)
+                if (listingService.deleteListing(id)) {
+                    call.respond(HttpStatusCode.NoContent)
+                } else {
+                    call.respond(HttpStatusCode.NotFound, mapOf("error" to "Listing not found"))
+                }
+            } catch (e: IllegalArgumentException) {
+                call.respond(HttpStatusCode.BadRequest, mapOf("error" to "Invalid UUID format"))
+            } catch (e: Exception) {
+                call.respond(HttpStatusCode.InternalServerError, mapOf("error" to "Failed to delete listing"))
             }
         }
     }

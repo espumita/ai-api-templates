@@ -14,7 +14,7 @@ data class Location(
 )
 
 data class Listing(
-    val listingId: String = UUID.randomUUID().toString(),
+    val listingId: UUID = UUID.randomUUID(),
     val name: String,
     val description: String,
     val price: Price,
@@ -51,3 +51,10 @@ data class Listing(
         )
     }
 }
+
+data class PaginatedListingsResponse(
+    val items: List<Listing>,
+    val totalItems: Int,
+    val page: Int,
+    val pageSize: Int
+)

@@ -1,5 +1,8 @@
 package com.example
 
+import com.example.database.DatabaseConfig
+import com.example.repositories.IListingRepository
+import com.example.repositories.ListingRepository
 import com.example.routes.listingRoutes
 import com.example.services.ListingService
 import io.ktor.serialization.jackson.*
@@ -42,8 +45,10 @@ fun Application.module() {
         }
     }
 
-    // Initialize services
-    val listingService = ListingService()
+    // Initialize database and services
+    val dataSource = DatabaseConfig.createDataSource()
+    val listingRepository: IListingRepository = ListingRepository(dataSource)
+    val listingService = ListingService(listingRepository)
 
     // Configure OpenAPI and Swagger
     routing {
