@@ -206,6 +206,26 @@ curl -X DELETE http://localhost:8080/api/listings/123e4567-e89b-12d3-a456-426614
 ```
 Response (204 No Content)
 
+### Architecture and Data Persistence
+
+#### Data Persistence Layer
+
+Each implementation should include a well-structured data persistence layer to provide a clean separation between the business logic and data access:
+
+- **Data Access Abstraction**: Create appropriate abstractions for data operations following the language/framework conventions
+- **Database Integration**: Implement proper database connection and query handling
+- **Dependency Injection**: Use dependency injection to manage data access dependencies
+- **Transaction Management**: Implement proper transaction handling for data consistency
+
+#### PostgreSQL Database Requirements
+
+- **Database Setup**: Use PostgreSQL as the primary database
+- **Connection Management**: Implement proper connection string management and connection pooling
+- **Schema Management**: Include database migrations or schema setup scripts
+- **Table Structure**: Create appropriate tables with proper indexing for listings
+- **Data Types**: Use appropriate PostgreSQL data types (UUID for IDs, JSONB for complex objects like Price and Location)
+- **Constraints**: Implement proper database constraints (foreign keys, check constraints for categories, etc.)
+
 ### Implementation Guidelines
 
 - Follow RESTful API design principles
@@ -215,6 +235,8 @@ Response (204 No Content)
 - Follow the language/framework specific best practices and conventions
 - Implement proper data validation for all fields
 - Use appropriate data types for each field
+- **Data Persistence Layer**: Implement a proper data persistence layer to separate data access logic from business logic following language/framework conventions
+- **PostgreSQL Database**: Use PostgreSQL as the database implementation for data persistence. Configure connection strings and implement proper database migrations/schema setup
 
 ### Future Considerations
 
