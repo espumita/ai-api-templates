@@ -12,14 +12,25 @@ This is a sample Ktor API project that demonstrates a marketplace listings servi
 
 ### Database Setup
 
-The application uses PostgreSQL for data persistence. You can set up the database in several ways:
+The application uses PostgreSQL for data persistence and shares the database schema with other implementations in this repository.
 
-#### Option 1: Local PostgreSQL Installation
+#### Option 1: Using Shared Docker Compose (Recommended)
+1. Navigate to the root directory of the repository:
+   ```bash
+   cd api-templates
+   ```
+2. Start the shared PostgreSQL service:
+   ```bash
+   docker-compose up -d
+   ```
+   This will start PostgreSQL with the shared schema automatically loaded from `database/schema.sql`
+
+#### Option 2: Local PostgreSQL Installation
 1. Install PostgreSQL on your local machine
 2. Create a database named `marketplace`
-3. Run the schema SQL script located at `src/main/kotlin/com/example/database/schema.sql`
+3. Run the schema SQL script located at `../database/schema.sql`
 
-#### Option 2: Docker PostgreSQL
+#### Option 3: Manual Docker PostgreSQL
 ```bash
 docker run --name marketplace-postgres \
   -e POSTGRES_DB=marketplace \
@@ -29,9 +40,9 @@ docker run --name marketplace-postgres \
   -d postgres:15
 ```
 
-After the container starts, execute the schema:
+After the container starts, execute the shared schema:
 ```bash
-docker exec -i marketplace-postgres psql -U postgres -d marketplace < src/main/kotlin/com/example/database/schema.sql
+docker exec -i marketplace-postgres psql -U postgres -d marketplace < ../database/schema.sql
 ```
 
 ### Environment Variables
@@ -47,12 +58,16 @@ Configure the database connection using these environment variables:
 ### Running Locally
 1. Navigate to the project directory
 2. Set up the database (see Database Setup section)
-3. Run the application:
+3. If using the shared Docker Compose, make sure to run it from the root directory:
+   ```bash
+   cd ../; docker-compose up -d; cd kotlin-ktor-sample
+   ```
+4. Run the application:
    ```bash
    ./gradlew run
    ```
-4. The API will be available at `http://localhost:8080`
-5. Access the Swagger documentation at `http://localhost:8080/swagger`
+5. The API will be available at `http://localhost:8080`
+6. Access the Swagger documentation at `http://localhost:8080/swagger`
 
 ## Data Persistence Architecture
 
@@ -142,8 +157,7 @@ src/main/kotlin/
 ├── Routing.kt                        # API route definitions
 └── com/example/
     ├── database/
-    │   ├── DatabaseConfig.kt         # Database connection configuration
-    │   └── schema.sql                # PostgreSQL database schema
+    │   └── DatabaseConfig.kt         # Database connection configuration
     ├── models/
     │   └── Listing.kt                # Data models and DTOs
     ├── repositories/
@@ -155,6 +169,11 @@ src/main/kotlin/
     │   └── ListingService.kt         # Business logic layer
     └── validation/
         └── ListingValidation.kt      # Input validation logic
+
+../database/
+└── schema.sql                       # Shared PostgreSQL database schema
+
+../docker-compose.yml                # Shared PostgreSQL service configuration
 ```
 
 ## Dependencies

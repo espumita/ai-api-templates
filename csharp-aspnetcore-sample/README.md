@@ -19,14 +19,19 @@ This is a C# ASP.NET Core implementation of the marketplace API using the Reposi
 
 ## Quick Start
 
-1. **Clone and navigate to the project:**
+1. **Clone and navigate to the root directory:**
    ```bash
-   cd csharp-aspnetcore-sample
+   cd api-templates
    ```
 
-2. **Start the PostgreSQL database:**
+2. **Start the PostgreSQL database (from root directory):**
    ```bash
    docker-compose up -d
+   ```
+
+3. **Navigate to the C# project:**
+   ```bash
+   cd csharp-aspnetcore-sample
    ```
 
 3. **Run the API:**
@@ -49,14 +54,15 @@ This is a C# ASP.NET Core implementation of the marketplace API using the Reposi
 
 ### Option 1: Using Docker Compose (Recommended for local development)
 
-1. **Start PostgreSQL with Docker Compose:**
+1. **Start PostgreSQL with Docker Compose (from the root api-templates directory):**
    ```bash
+   cd api-templates
    docker-compose up -d
    ```
    This will:
    - Start a PostgreSQL 15 container
    - Create the `marketplace` database
-   - Automatically run the schema script from `Database/schema.sql`
+   - Automatically run the schema script from the shared `database/schema.sql`
    - Expose PostgreSQL on port 5432
 
 2. **Stop the database:**
@@ -78,10 +84,10 @@ This is a C# ASP.NET Core implementation of the marketplace API using the Reposi
    ```
 
 2. **Run the database schema:**
-   Execute the SQL script located in `Database/schema.sql` against your PostgreSQL database:
+   Execute the SQL script located in the shared `../database/schema.sql` against your PostgreSQL database:
    ```bash
-   psql -U postgres -d marketplace -f Database/schema.sql
-   psql -U postgres -d marketplace_dev -f Database/schema.sql
+   psql -U postgres -d marketplace -f ../database/schema.sql
+   psql -U postgres -d marketplace_dev -f ../database/schema.sql
    ```
 
 ## Configuration
@@ -221,7 +227,7 @@ The PostgreSQL schema includes:
 
 ### Adding New Features
 
-1. Update the database schema in `Database/schema.sql`
+1. Update the database schema in the shared `../database/schema.sql`
 2. Modify the `Listing` model if needed
 3. Update repository interface and implementation
 4. Modify controller endpoints
@@ -245,11 +251,10 @@ You can test the API using:
 
 ### PostgreSQL with Docker Compose
 
-The project includes a `docker-compose.yml` file for easy PostgreSQL setup:
+The project uses a shared `docker-compose.yml` file in the root directory for easy PostgreSQL setup:
 
 ```yaml
-# docker-compose.yml
-version: '3.8'
+# ../docker-compose.yml
 services:
   postgres:
     image: postgres:15
@@ -261,7 +266,7 @@ services:
       - "5432:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
-      - ./Database/schema.sql:/docker-entrypoint-initdb.d/schema.sql
+      - ./database/schema.sql:/docker-entrypoint-initdb.d/schema.sql
 ```
 
 **Key features:**
@@ -292,8 +297,8 @@ The API will be available at `http://localhost:8081`. You can access the Swagger
 - `Controllers/` - API controllers
 - `Models/` - Data models and DTOs
 - `Repositories/` - Repository pattern implementation
-- `Database/` - Database schema and scripts
 - `Properties/` - Launch settings and configuration
 - `Program.cs` - Application entry point and DI configuration
 - `Dockerfile` - Docker configuration for containerization
-- `docker-compose.yml` - PostgreSQL container setup
+- `../database/` - Shared database schema and scripts (root level)
+- `../docker-compose.yml` - Shared PostgreSQL container setup (root level)
