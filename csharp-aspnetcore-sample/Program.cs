@@ -1,4 +1,5 @@
 using Microsoft.OpenApi.Models;
+using csharp_aspnetcore_sample.Repositories;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -8,6 +9,10 @@ builder.Services.AddControllers()
     {
         options.JsonSerializerOptions.Converters.Add(new System.Text.Json.Serialization.JsonStringEnumConverter());
     });
+
+// Register repository
+builder.Services.AddScoped<IListingRepository, ListingRepository>();
+
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen(c =>
 {
