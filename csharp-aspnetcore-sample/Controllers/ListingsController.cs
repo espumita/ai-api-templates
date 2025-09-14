@@ -22,9 +22,10 @@ public class ListingsController : ControllerBase
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     public async Task<ActionResult<PaginatedListingsResponse>> GetListings([FromQuery] int page = 1, [FromQuery] int pageSize = 10)
     {
-        if (page < 1 || pageSize < 1)
+
+        if (pageSize > 50)
         {
-            return BadRequest("Page and page size must be positive numbers");
+            return BadRequest("Page size cannot exceed 50 items");
         }
 
         var listings = await _listingRepository.GetAllAsync(page, pageSize);
@@ -134,9 +135,9 @@ public class ListingsController : ControllerBase
             return BadRequest(ModelState);
         }
 
-        if (filterRequest.Page < 1 || filterRequest.PageSize < 1)
+        if (filterRequest.PageSize > 50)
         {
-            return BadRequest("Page and page size must be positive numbers");
+            return BadRequest("Page size cannot exceed 50 items");
         }
 
         // Validate filter operators and fields

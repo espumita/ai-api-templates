@@ -45,8 +45,8 @@ fun Route.listingRoutes(listingService: ListingService) {
                 val page = call.request.queryParameters["page"]?.toIntOrNull() ?: 1
                 val pageSize = call.request.queryParameters["pageSize"]?.toIntOrNull() ?: 10
                 
-                if (page < 1 || pageSize < 1) {
-                    call.respond(HttpStatusCode.BadRequest, mapOf("error" to "Invalid page or pageSize parameters"))
+                if (pageSize > 50) {
+                    call.respond(HttpStatusCode.BadRequest, mapOf("error" to "Page size cannot exceed 50 items"))
                     return@get
                 }
                 
@@ -68,6 +68,12 @@ fun Route.listingRoutes(listingService: ListingService) {
             // )
             try {
                 val searchRequest = call.receive<SearchRequest>()
+                                
+                if (searchRequest.pageSize > 50) {
+                    call.respond(HttpStatusCode.BadRequest, mapOf("error" to "Page size cannot exceed 50 items"))
+                    return@post
+                }
+                
                 val searchResponse = listingService.searchListings(searchRequest)
                 call.respond(HttpStatusCode.OK, searchResponse)
             } catch (e: IllegalArgumentException) {

@@ -58,7 +58,7 @@ data class SearchRequest(
     init {
         require(page >= 1) { "Page must be >= 1" }
         require(pageSize >= 1) { "Page size must be >= 1" }
-        require(pageSize <= 100) { "Page size cannot exceed 100" }
+        require(pageSize <= 50) { "Page size cannot exceed 50 items" }
     }
 }
 

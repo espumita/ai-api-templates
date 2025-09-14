@@ -38,7 +38,7 @@ Each implementation should provide the following endpoints with their respective
 2. **Get All Listings**
    - GET /api/listings
    - Returns all available listings
-   - Should support pagination
+   - Should support pagination with a maximum limit of 50 items per page
    - Response codes:
      - 200 OK: Successful response with listings
      - 400 Bad Request: Invalid page or pageSize parameters
@@ -71,7 +71,7 @@ The API should provide advanced search and filtering capabilities through a dedi
 
 6. **Search and Filter Listings**
    - POST /api/listings/search
-   - Returns filtered listings with pagination support
+   - Returns filtered listings with pagination support (maximum 50 items per page)
    - Supports extensible filtering system with operators
    - Response codes:
      - 200 OK: Successful response with filtered results
