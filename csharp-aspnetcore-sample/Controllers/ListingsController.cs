@@ -122,4 +122,57 @@ public class ListingsController : ControllerBase
 
         return NoContent();
     }
+
+    // POST: api/listings/search
+    [HttpPost("search")]
+    [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(SearchResponse))]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    public async Task<ActionResult<SearchResponse>> SearchListings([FromBody] FilterRequest filterRequest)
+    {
+        if (!ModelState.IsValid)
+        {
+            return BadRequest(ModelState);
+        }
+
+        if (filterRequest.Page < 1 || filterRequest.PageSize < 1)
+        {
+            return BadRequest("Page and page size must be positive numbers");
+        }
+
+        // Validate filter operators and fields
+        var validFields = new[] { "name", "description", "category", "location.country", "location.municipality" };
+        var validOperators = new[] { "contains", "equals" };
+
+        foreach (var filter in filterRequest.Filters)
+        {
+            if (!validFields.Contains(filter.Field.ToLowerInvariant()))
+            {
+                return BadRequest($"Invalid filter field: {filter.Field}. Valid fields are: {string.Join(", ", validFields)}");
+            }
+
+            if (!validOperators.Contains(filter.Operator.ToLowerInvariant()))
+            {
+                return BadRequest($"Invalid filter operator: {filter.Operator}. Valid operators are: {string.Join(", ", validOperators)}");
+            }
+
+            // Special validation for category field - must use equals operator
+            if (filter.Field.ToLowerInvariant() == "category" && filter.Operator.ToLowerInvariant() != "equals")
+            {
+                return BadRequest("Category field only supports 'equals' operator");
+            }
+        }
+
+        var (items, totalCount) = await _listingRepository.SearchAsync(filterRequest.Filters, filterRequest.Page, filterRequest.PageSize);
+
+        var response = new SearchResponse
+        {
+            Items = items,
+            TotalItems = totalCount,
+            Page = filterRequest.Page,
+            PageSize = filterRequest.PageSize,
+            AppliedFilters = filterRequest.Filters
+        };
+
+        return Ok(response);
+    }
 }

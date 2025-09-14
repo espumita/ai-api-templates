@@ -64,3 +64,98 @@ Content-Type: application/json
 DELETE {{csharp_aspnetcore_sample_HostAddress}}/api/listings/123e4567-e89b-12d3-a456-426614174000
 
 ###
+
+# Search listings by name
+POST {{csharp_aspnetcore_sample_HostAddress}}/api/listings/search
+Content-Type: application/json
+
+{
+  "filters": [
+    {
+      "field": "name",
+      "operator": "contains",
+      "value": "guitar"
+    }
+  ],
+  "page": 1,
+  "pageSize": 10
+}
+
+###
+
+# Search listings by category
+POST {{csharp_aspnetcore_sample_HostAddress}}/api/listings/search
+Content-Type: application/json
+
+{
+  "filters": [
+    {
+      "field": "category",
+      "operator": "equals",
+      "value": "Music"
+    }
+  ],
+  "page": 1,
+  "pageSize": 10
+}
+
+###
+
+# Search listings with multiple filters
+POST {{csharp_aspnetcore_sample_HostAddress}}/api/listings/search
+Content-Type: application/json
+
+{
+  "filters": [
+    {
+      "field": "name",
+      "operator": "contains",
+      "value": "guitar"
+    },
+    {
+      "field": "category",
+      "operator": "equals",
+      "value": "Music"
+    }
+  ],
+  "page": 1,
+  "pageSize": 20
+}
+
+###
+
+# Search listings by location
+POST {{csharp_aspnetcore_sample_HostAddress}}/api/listings/search
+Content-Type: application/json
+
+{
+  "filters": [
+    {
+      "field": "location.country",
+      "operator": "contains",
+      "value": "US"
+    }
+  ],
+  "page": 1,
+  "pageSize": 10
+}
+
+###
+
+# Search listings by description
+POST {{csharp_aspnetcore_sample_HostAddress}}/api/listings/search
+Content-Type: application/json
+
+{
+  "filters": [
+    {
+      "field": "description",
+      "operator": "contains",
+      "value": "excellent"
+    }
+  ],
+  "page": 1,
+  "pageSize": 10
+}
+
+###

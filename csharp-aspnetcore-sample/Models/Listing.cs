@@ -90,3 +90,31 @@ public class PaginatedListingsResponse
     public int Page { get; set; }
     public int PageSize { get; set; }
 }
+
+public class FilterRequest
+{
+    public List<Filter> Filters { get; set; } = new();
+    public int Page { get; set; } = 1;
+    public int PageSize { get; set; } = 10;
+}
+
+public class Filter
+{
+    [Required]
+    public string Field { get; set; } = string.Empty;
+    
+    [Required]
+    public string Operator { get; set; } = string.Empty;
+    
+    [Required]
+    public object Value { get; set; } = string.Empty;
+}
+
+public class SearchResponse
+{
+    public IEnumerable<Listing> Items { get; set; } = new List<Listing>();
+    public int TotalItems { get; set; }
+    public int Page { get; set; }
+    public int PageSize { get; set; }
+    public List<Filter> AppliedFilters { get; set; } = new();
+}

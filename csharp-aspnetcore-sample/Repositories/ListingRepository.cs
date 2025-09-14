@@ -154,6 +154,105 @@ public class ListingRepository : IListingRepository
         return count > 0;
     }
 
+    public async Task<(IEnumerable<Listing> Items, int TotalCount)> SearchAsync(List<Filter> filters, int page, int pageSize)
+    {
+        var baseSql = @"
+            SELECT 
+                listing_id as ListingId,
+                name as Name,
+                description as Description,
+                price_currency as Currency,
+                price_amount as Amount,
+                category as Category,
+                location_country as Country,
+                location_municipality as Municipality,
+                location_geohash as Geohash
+            FROM listings";
+
+        var countSql = "SELECT COUNT(*) FROM listings";
+        
+        var whereConditions = new List<string>();
+        var parameters = new DynamicParameters();
+        
+        BuildWhereClause(filters, whereConditions, parameters);
+        
+        if (whereConditions.Count > 0)
+        {
+            var whereClause = " WHERE " + string.Join(" AND ", whereConditions);
+            baseSql += whereClause;
+            countSql += whereClause;
+        }
+        
+        baseSql += " ORDER BY created_at DESC";
+        
+        var offset = (page - 1) * pageSize;
+        parameters.Add("@PageSize", pageSize);
+        parameters.Add("@Offset", offset);
+        
+        var paginatedSql = baseSql + " LIMIT @PageSize OFFSET @Offset";
+        
+        using var connection = CreateConnection();
+        
+        var itemsTask = await connection.QueryAsync(paginatedSql, parameters);
+        var totalCount = await connection.QuerySingleAsync<int>(countSql, parameters);
+        
+        var items = itemsTask.Select(MapToListing);
+        
+        return (items, totalCount);
+    }
+
+    private static void BuildWhereClause(List<Filter> filters, List<string> whereConditions, DynamicParameters parameters)
+    {
+        for (int i = 0; i < filters.Count; i++)
+        {
+            var filter = filters[i];
+            var paramName = $"param{i}";
+            
+            switch (filter.Field.ToLowerInvariant())
+            {
+                case "name":
+                    if (filter.Operator.ToLowerInvariant() == "contains")
+                    {
+                        whereConditions.Add($"LOWER(name) LIKE LOWER(@{paramName})");
+                        parameters.Add($"@{paramName}", $"%{filter.Value}%");
+                    }
+                    break;
+                    
+                case "description":
+                    if (filter.Operator.ToLowerInvariant() == "contains")
+                    {
+                        whereConditions.Add($"LOWER(description) LIKE LOWER(@{paramName})");
+                        parameters.Add($"@{paramName}", $"%{filter.Value}%");
+                    }
+                    break;
+                    
+                case "category":
+                    if (filter.Operator.ToLowerInvariant() == "equals")
+                    {
+                        whereConditions.Add($"category = @{paramName}");
+                        parameters.Add($"@{paramName}", filter.Value.ToString());
+                    }
+                    break;
+                    
+                case "location.country":
+                    if (filter.Operator.ToLowerInvariant() == "contains")
+                    {
+                        whereConditions.Add($"LOWER(location_country) LIKE LOWER(@{paramName})");
+                        parameters.Add($"@{paramName}", $"%{filter.Value}%");
+                    }
+                    break;
+                    
+                case "location.municipality":
+                    if (filter.Operator.ToLowerInvariant() == "contains")
+                    {
+                        whereConditions.Add($"LOWER(location_municipality) LIKE LOWER(@{paramName})");
+                        parameters.Add($"@{paramName}", $"%{filter.Value}%");
+                    }
+                    break;
+            }
+        }
+    }
+
     private static Listing MapToListing(dynamic row)
     {
         var categoryString = (string)row.category;
