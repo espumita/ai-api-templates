@@ -77,6 +77,18 @@ The API should provide advanced search and filtering capabilities through a dedi
      - 200 OK: Successful response with filtered results
      - 400 Bad Request: Invalid filter criteria or operators
 
+#### 3. Sorting
+
+Both the **Get All Listings** (GET /api/listings) and **Search and Filter Listings** (POST /api/listings/search) endpoints should support sorting rules under the hood:
+
+- **Optional Location Parameters**: Clients can optionally provide `latitude` and `longitude` parameters to enable proximity-based sorting
+- **Flexible Sorting System**: Implement a configurable sorting system with the following rules applied in order:
+  - **Rule 1 (Distance)**: Sort by proximity to client location using latitude/longitude-based distance calculation in kilometers
+  - **Rule 2**: Cheaper listings should appear before, comparison should compare amount. Ignore different currencies for simplicity
+  - **Rule 3**: Reserved for future sorting criteria (placeholder)
+- **Extensible Architecture**: The sorting system should be designed using a strategy pattern or similar design pattern to easily add, remove, or reorder sorting rules without major code changes
+- **Distance Calculation**: Use the Haversine formula or similar algorithm to calculate distances between client location and listing locations using their geohash coordinates converted to latitude/longitude
+
 **Filter Structure:**
 
 The filtering system uses a flexible structure where each filter consists of:
@@ -321,6 +333,76 @@ curl -X POST http://localhost:8080/api/listings/search `
       "value": "guitar"
     }
   ]
+}
+```
+
+7. **Sorting Examples**
+
+**Get All Listings with Proximity Sorting:**
+```bash
+# Get listings sorted by distance from client location (Austin, TX coordinates)
+curl -X GET "http://localhost:8080/api/listings?page=1&pageSize=10&latitude=30.2672&longitude=-97.7431"
+```
+
+**Search with Filters and Proximity Sorting:**
+```bash
+curl -X POST http://localhost:8080/api/listings/search `
+  -H "Content-Type: application/json" `
+  -d '{
+    "filters": [
+      {
+        "field": "category",
+        "operator": "contains",
+        "value": "Music"
+      }
+    ],
+    "page": 1,
+    "pageSize": 10,
+    "latitude": 30.2672,
+    "longitude": -97.7431
+  }'
+```
+
+**Sorted Response (200 OK):**
+```json
+{
+  "items": [
+    {
+      "listingId": "456e7890-e89b-12d3-a456-426614174001",
+      "name": "Acoustic Guitar",
+      "description": "Beautiful acoustic guitar perfect for beginners",
+      "price": {
+        "currency": "USD",
+        "amount": 299.99
+      },
+      "category": "Music",
+      "location": {
+        "country": "United States",
+        "municipality": "Austin",
+        "geohash": "dr5regw"
+      },
+      "distanceInKm": 2.1
+    },
+    {
+      "listingId": "123e4567-e89b-12d3-a456-426614174000",
+      "name": "Vintage Guitar",
+      "description": "1970s Fender Stratocaster in excellent condition",
+      "price": {
+        "currency": "USD",
+        "amount": 1299.99
+      },
+      "category": "Music",
+      "location": {
+        "country": "United States",
+        "municipality": "Houston",
+        "geohash": "dr5x1"
+      },
+      "distanceInKm": 165.3
+    }
+  ],
+  "totalItems": 2,
+  "page": 1,
+  "pageSize": 10
 }
 ```
 
