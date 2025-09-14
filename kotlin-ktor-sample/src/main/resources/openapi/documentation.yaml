@@ -37,8 +37,20 @@ paths:
           schema:
             type: "integer"
       responses:
+        "400":
+          description: "Bad Request"
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/Map_String"
         "200":
           description: "OK"
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/PaginatedListingsResponse"
+        "500":
+          description: "Internal Server Error"
           content:
             '*/*':
               schema:
@@ -60,6 +72,12 @@ paths:
                 $ref: "#/components/schemas/Listing"
         "400":
           description: "Bad Request"
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/Map_String"
+        "500":
+          description: "Internal Server Error"
           content:
             '*/*':
               schema:
@@ -92,6 +110,12 @@ paths:
             '*/*':
               schema:
                 $ref: "#/components/schemas/Map_String"
+        "500":
+          description: "Internal Server Error"
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/Map_String"
     get:
       description: "Get single listing"
       parameters:
@@ -119,6 +143,12 @@ paths:
             '*/*':
               schema:
                 $ref: "#/components/schemas/Map_String"
+        "500":
+          description: "Internal Server Error"
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/Map_String"
     put:
       description: "Update listing"
       parameters:
@@ -140,14 +170,20 @@ paths:
             '*/*':
               schema:
                 type: "object"
-        "204":
-          description: "No Content"
+        "200":
+          description: "OK"
           content:
             '*/*':
               schema:
-                type: "object"
+                $ref: "#/components/schemas/Listing"
         "404":
           description: "Not Found"
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/Map_String"
+        "500":
+          description: "Internal Server Error"
           content:
             '*/*':
               schema:
@@ -170,11 +206,25 @@ components:
       required:
         - "currency"
         - "amount"
+    Location:
+      type: "object"
+      properties:
+        country:
+          type: "string"
+        municipality:
+          type: "string"
+        geohash:
+          type: "string"
+      required:
+        - "country"
+        - "municipality"
+        - "geohash"
     Listing:
       type: "object"
       properties:
         listingId:
           type: "string"
+          format: "uuid"
         name:
           type: "string"
         description:
@@ -183,9 +233,33 @@ components:
           $ref: "#/components/schemas/Price"
         category:
           type: "string"
+        location:
+          $ref: "#/components/schemas/Location"
       required:
         - "listingId"
         - "name"
         - "description"
         - "price"
         - "category"
+        - "location"
+    PaginatedListingsResponse:
+      type: "object"
+      properties:
+        items:
+          type: "array"
+          items:
+            $ref: "#/components/schemas/Listing"
+        totalItems:
+          type: "integer"
+          format: "int32"
+        page:
+          type: "integer"
+          format: "int32"
+        pageSize:
+          type: "integer"
+          format: "int32"
+      required:
+        - "items"
+        - "totalItems"
+        - "page"
+        - "pageSize"
