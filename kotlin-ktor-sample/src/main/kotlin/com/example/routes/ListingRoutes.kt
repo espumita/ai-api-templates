@@ -1,6 +1,7 @@
 package com.example.routes
 
 import com.example.models.Listing
+import com.example.models.SearchRequest
 import com.example.services.ListingService
 import io.ktor.http.*
 import io.ktor.server.application.*
@@ -53,6 +54,26 @@ fun Route.listingRoutes(listingService: ListingService) {
                 call.respond(listings)
             } catch (e: Exception) {
                 call.respond(HttpStatusCode.InternalServerError, mapOf("error" to "Failed to retrieve listings"))
+            }
+        }
+
+        // Search and filter listings
+        post("search") {
+            // @OpenAPI(
+            //   summary = "Search and filter listings",
+            //   responses = [
+            //     OpenApiResponse(status = "200", description = "Successful response with filtered results"),
+            //     OpenApiResponse(status = "400", description = "Invalid filter criteria or operators")
+            //   ]
+            // )
+            try {
+                val searchRequest = call.receive<SearchRequest>()
+                val searchResponse = listingService.searchListings(searchRequest)
+                call.respond(HttpStatusCode.OK, searchResponse)
+            } catch (e: IllegalArgumentException) {
+                call.respond(HttpStatusCode.BadRequest, mapOf("error" to e.message))
+            } catch (e: Exception) {
+                call.respond(HttpStatusCode.InternalServerError, mapOf("error" to "Failed to search listings"))
             }
         }
 

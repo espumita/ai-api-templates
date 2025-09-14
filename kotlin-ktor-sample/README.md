@@ -128,6 +128,93 @@ The API provides the following endpoints for managing marketplace listings:
 | GET | `/api/listings/{id}` | Get a specific listing by UUID |
 | PUT | `/api/listings/{id}` | Update an existing listing |
 | DELETE | `/api/listings/{id}` | Delete a listing |
+| POST | `/api/listings/search` | Search and filter listings with advanced criteria |
+
+### Advanced Listing Search and Filtering
+
+The `/api/listings/search` endpoint provides powerful filtering capabilities:
+
+#### Supported Filter Fields
+- `name`: Listing name (supports `contains` operator)
+- `description`: Listing description (supports `contains` operator)
+- `category`: Listing category (supports `equals` operator only)
+- `location.country`: Location country (supports `contains` operator)
+- `location.municipality`: Location municipality (supports `contains` operator)
+
+#### Supported Operators
+- `contains`: Text contains substring (case-insensitive)
+- `equals`: Exact match
+
+#### Example Search Requests
+
+**Basic Text Search:**
+```json
+POST /api/listings/search
+{
+  "filters": [
+    {
+      "field": "name",
+      "operator": "contains", 
+      "value": "guitar"
+    }
+  ],
+  "page": 1,
+  "pageSize": 10
+}
+```
+
+**Multiple Filters:**
+```json
+POST /api/listings/search
+{
+  "filters": [
+    {
+      "field": "name",
+      "operator": "contains",
+      "value": "guitar"
+    },
+    {
+      "field": "category", 
+      "operator": "equals",
+      "value": "Music"
+    }
+  ],
+  "page": 1,
+  "pageSize": 20
+}
+```
+
+**Location-based Search:**
+```json
+POST /api/listings/search
+{
+  "filters": [
+    {
+      "field": "location.country",
+      "operator": "contains",
+      "value": "US"
+    },
+    {
+      "field": "location.municipality",
+      "operator": "contains", 
+      "value": "austin"
+    }
+  ],
+  "page": 1,
+  "pageSize": 10
+}
+```
+
+#### Search Response Format
+```json
+{
+  "items": [/* array of matching listings */],
+  "totalItems": 25,
+  "page": 1,
+  "pageSize": 10,
+  "appliedFilters": [/* array of applied filters */]
+}
+```
 
 Refer to the Swagger documentation at `/swagger` for detailed information about request/response schemas and examples.
 
@@ -159,7 +246,8 @@ src/main/kotlin/
     ├── database/
     │   └── DatabaseConfig.kt         # Database connection configuration
     ├── models/
-    │   └── Listing.kt                # Data models and DTOs
+    │   ├── Listing.kt                # Core data models and DTOs
+    │   └── SearchModels.kt           # Search and filtering models
     ├── repositories/
     │   ├── IListingRepository.kt     # Repository interface
     │   └── ListingRepository.kt      # PostgreSQL repository implementation

@@ -2,6 +2,8 @@ package com.example.services
 
 import com.example.models.Listing
 import com.example.models.PaginatedListingsResponse
+import com.example.models.SearchRequest
+import com.example.models.SearchResponse
 import com.example.repositories.IListingRepository
 import java.util.UUID
 
@@ -38,5 +40,23 @@ class ListingService(private val listingRepository: IListingRepository) {
 
     fun listingExists(id: UUID): Boolean {
         return listingRepository.exists(id)
+    }
+
+    fun searchListings(searchRequest: SearchRequest): SearchResponse {
+        val items = listingRepository.searchListings(
+            filters = searchRequest.filters,
+            page = searchRequest.page,
+            pageSize = searchRequest.pageSize
+        )
+        
+        val totalItems = listingRepository.getSearchResultCount(searchRequest.filters)
+        
+        return SearchResponse(
+            items = items,
+            totalItems = totalItems,
+            page = searchRequest.page,
+            pageSize = searchRequest.pageSize,
+            appliedFilters = searchRequest.filters
+        )
     }
 }

@@ -52,7 +52,8 @@ fun Application.module() {
 
     // Configure OpenAPI and Swagger
     routing {
-        openAPI(path = "openapi", swaggerFile = "openapi/documentation.yaml")
+        // Temporarily disabled due to schema compatibility issues
+        // openAPI(path = "openapi", swaggerFile = "openapi/documentation.yaml")
         swaggerUI(path = "swagger", swaggerFile = "openapi/documentation.yaml")
     }
 

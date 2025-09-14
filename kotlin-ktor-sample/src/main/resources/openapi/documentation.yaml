@@ -188,6 +188,34 @@ paths:
             '*/*':
               schema:
                 $ref: "#/components/schemas/Map_String"
+  /api/listings/search:
+    post:
+      description: "Search and filter listings"
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/SearchRequest"
+        required: true
+      responses:
+        "200":
+          description: "OK"
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/SearchResponse"
+        "400":
+          description: "Bad Request"
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/Map_String"
+        "500":
+          description: "Internal Server Error"
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/Map_String"
 components:
   schemas:
     Map:
@@ -263,3 +291,67 @@ components:
         - "totalItems"
         - "page"
         - "pageSize"
+    Object:
+      type: "object"
+      properties: { }
+    SearchFilter:
+      type: "object"
+      properties:
+        field:
+          type: "string"
+        operator:
+          type: "string"
+          enum:
+            - "CONTAINS"
+            - "EQUALS"
+        value:
+          $ref: "#/components/schemas/Object"
+      required:
+        - "field"
+        - "operator"
+        - "value"
+    SearchRequest:
+      type: "object"
+      properties:
+        filters:
+          type: "array"
+          items:
+            $ref: "#/components/schemas/SearchFilter"
+        page:
+          type: "integer"
+          format: "int32"
+          default: "1"
+        pageSize:
+          type: "integer"
+          format: "int32"
+          default: "10"
+      required:
+        - "filters"
+        - "page"
+        - "pageSize"
+    SearchResponse:
+      type: "object"
+      properties:
+        items:
+          type: "array"
+          items:
+            $ref: "#/components/schemas/Listing"
+        totalItems:
+          type: "integer"
+          format: "int32"
+        page:
+          type: "integer"
+          format: "int32"
+        pageSize:
+          type: "integer"
+          format: "int32"
+        appliedFilters:
+          type: "array"
+          items:
+            $ref: "#/components/schemas/SearchFilter"
+      required:
+        - "items"
+        - "totalItems"
+        - "page"
+        - "pageSize"
+        - "appliedFilters"

@@ -3,6 +3,8 @@ package com.example.repositories
 import com.example.models.Listing
 import com.example.models.Price
 import com.example.models.Location
+import com.example.models.SearchFilter
+import com.example.models.FilterOperator
 import java.sql.*
 import java.util.UUID
 import javax.sql.DataSource
@@ -173,6 +175,116 @@ class ListingRepository(private val dataSource: DataSource) : IListingRepository
                     resultSet.getInt(1) > 0
                 }
             }
+        }
+    }
+
+    override fun searchListings(filters: List<SearchFilter>, page: Int, pageSize: Int): List<Listing> {
+        val baseQuery = """
+            SELECT 
+                listing_id,
+                name,
+                description,
+                price_currency,
+                price_amount,
+                category,
+                location_country,
+                location_municipality,
+                location_geohash
+            FROM listings
+        """.trimIndent()
+
+        val (whereClause, parameters) = buildWhereClause(filters)
+        val sql = if (whereClause.isNotEmpty()) {
+            "$baseQuery WHERE $whereClause ORDER BY created_at DESC LIMIT ? OFFSET ?"
+        } else {
+            "$baseQuery ORDER BY created_at DESC LIMIT ? OFFSET ?"
+        }
+
+        return dataSource.connection.use { connection ->
+            connection.prepareStatement(sql).use { statement ->
+                var paramIndex = 1
+                
+                // Set filter parameters
+                for ((_, value) in parameters) {
+                    statement.setObject(paramIndex++, value)
+                }
+                
+                // Set pagination parameters
+                val offset = (page - 1) * pageSize
+                statement.setInt(paramIndex++, pageSize)
+                statement.setInt(paramIndex, offset)
+                
+                statement.executeQuery().use { resultSet ->
+                    val listings = mutableListOf<Listing>()
+                    while (resultSet.next()) {
+                        listings.add(mapToListing(resultSet))
+                    }
+                    listings
+                }
+            }
+        }
+    }
+
+    override fun getSearchResultCount(filters: List<SearchFilter>): Int {
+        val baseQuery = "SELECT COUNT(*) FROM listings"
+        val (whereClause, parameters) = buildWhereClause(filters)
+        val sql = if (whereClause.isNotEmpty()) {
+            "$baseQuery WHERE $whereClause"
+        } else {
+            baseQuery
+        }
+
+        return dataSource.connection.use { connection ->
+            connection.prepareStatement(sql).use { statement ->
+                var paramIndex = 1
+                
+                // Set filter parameters
+                for ((_, value) in parameters) {
+                    statement.setObject(paramIndex++, value)
+                }
+                
+                statement.executeQuery().use { resultSet ->
+                    resultSet.next()
+                    resultSet.getInt(1)
+                }
+            }
+        }
+    }
+
+    private fun buildWhereClause(filters: List<SearchFilter>): Pair<String, List<Pair<String, Any>>> {
+        if (filters.isEmpty()) {
+            return Pair("", emptyList())
+        }
+
+        val conditions = mutableListOf<String>()
+        val parameters = mutableListOf<Pair<String, Any>>()
+
+        for (filter in filters) {
+            val columnName = mapFilterFieldToColumn(filter.field)
+            
+            when (filter.operator) {
+                FilterOperator.CONTAINS -> {
+                    conditions.add("LOWER($columnName) LIKE LOWER(?)")
+                    parameters.add(Pair(columnName, "%${filter.value}%"))
+                }
+                FilterOperator.EQUALS -> {
+                    conditions.add("$columnName = ?")
+                    parameters.add(Pair(columnName, filter.value))
+                }
+            }
+        }
+
+        return Pair(conditions.joinToString(" AND "), parameters)
+    }
+
+    private fun mapFilterFieldToColumn(field: String): String {
+        return when (field) {
+            "name" -> "name"
+            "description" -> "description"
+            "category" -> "category"
+            "location.country" -> "location_country"
+            "location.municipality" -> "location_municipality"
+            else -> throw IllegalArgumentException("Unsupported filter field: $field")
         }
     }
 
