@@ -353,6 +353,7 @@ Each implementation should include a well-structured data persistence layer to p
 - Follow the language/framework specific best practices and conventions
 - Implement proper data validation for all fields
 - Use appropriate data types for each field
+- **Code Formatting**: Each implementation includes a `.editorconfig` file that defines consistent code formatting rules. All code should be formatted according to these rules to ensure consistency across the project
 - **Data Persistence Layer**: Implement a proper data persistence layer to separate data access logic from business logic following language/framework conventions
 - **PostgreSQL Database**: Use PostgreSQL as the database implementation for data persistence. Configure connection strings and implement proper database migrations/schema setup
 
