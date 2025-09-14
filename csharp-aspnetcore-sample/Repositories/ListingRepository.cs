@@ -156,25 +156,25 @@ public class ListingRepository : IListingRepository
 
     private static Listing MapToListing(dynamic row)
     {
-        var categoryString = (string)row.Category;
+        var categoryString = (string)row.category;
         var category = Enum.Parse<Category>(categoryString.Replace(" & ", "And").Replace(" ", "").Replace(",", ""));
 
         return new Listing
         {
-            ListingId = (Guid)row.ListingId,
-            Name = (string)row.Name,
-            Description = (string)row.Description,
+            ListingId =(Guid)row.listingid,
+            Name = (string)row.name,
+            Description = (string)row.description,
             Price = new Price
             {
-                Currency = (string)row.Currency,
-                Amount = (decimal)row.Amount
+                Currency = (string)row.currency,
+                Amount = (decimal)row.amount
             },
             Category = category,
             Location = new Location
             {
-                Country = (string)row.Country,
-                Municipality = (string)row.Municipality,
-                Geohash = (string)row.Geohash
+                Country = (string)row.country,
+                Municipality = (string)row.municipality,
+                Geohash = (string)row.geohash
             }
         };
     }
