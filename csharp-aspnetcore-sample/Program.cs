@@ -1,5 +1,6 @@
 using Microsoft.OpenApi.Models;
 using csharp_aspnetcore_sample.Repositories;
+using csharp_aspnetcore_sample.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -11,6 +12,9 @@ builder.Services.AddControllers()
 
 // Register repository
 builder.Services.AddScoped<IListingRepository, ListingRepository>();
+
+// Register sorting services
+builder.Services.AddScoped<ISortingService, SortingService>();
 
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen(c => {

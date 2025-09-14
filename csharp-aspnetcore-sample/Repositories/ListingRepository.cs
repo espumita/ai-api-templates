@@ -1,5 +1,6 @@
 using System.Data;
 using csharp_aspnetcore_sample.Models;
+using csharp_aspnetcore_sample.Services;
 using Dapper;
 using Npgsql;
 
@@ -7,15 +8,17 @@ namespace csharp_aspnetcore_sample.Repositories;
 
 public class ListingRepository : IListingRepository {
     private readonly string _connectionString;
+    private readonly ISortingService _sortingService;
 
-    public ListingRepository(IConfiguration configuration) {
+    public ListingRepository(IConfiguration configuration, ISortingService sortingService) {
         _connectionString = configuration.GetConnectionString("DefaultConnection") 
             ?? throw new InvalidOperationException("Connection string 'DefaultConnection' not found.");
+        _sortingService = sortingService;
     }
 
     private IDbConnection CreateConnection() => new NpgsqlConnection(_connectionString);
 
-    public async Task<IEnumerable<Listing>> GetAllAsync(int page, int pageSize) {
+    public async Task<IEnumerable<Listing>> GetAllAsync(int page, int pageSize, double? latitude = null, double? longitude = null) {
         const string sql = @"
             SELECT 
                 listing_id as ListingId,
@@ -28,15 +31,21 @@ public class ListingRepository : IListingRepository {
                 location_municipality as Municipality,
                 location_geohash as Geohash
             FROM listings 
-            ORDER BY created_at DESC
-            LIMIT @PageSize OFFSET @Offset";
+            ORDER BY created_at DESC";
 
         using var connection = CreateConnection();
+        
+        var result = await connection.QueryAsync(sql);
+        var listings = result.Select(MapToListing);
+        
+        // Apply sorting rules
+        var sortedListings = await _sortingService.ApplyAllSortingRulesAsync(listings, latitude, longitude);
+        
+        // Apply pagination after sorting
         var offset = (page - 1) * pageSize;
+        var paginatedListings = sortedListings.Skip(offset).Take(pageSize);
         
-        var result = await connection.QueryAsync(sql, new { PageSize = pageSize, Offset = offset });
-        
-        return result.Select(MapToListing);
+        return paginatedListings;
     }
 
     public async Task<int> GetTotalCountAsync() {
@@ -143,7 +152,7 @@ public class ListingRepository : IListingRepository {
         return count > 0;
     }
 
-    public async Task<(IEnumerable<Listing> Items, int TotalCount)> SearchAsync(List<Filter> filters, int page, int pageSize) {
+    public async Task<(IEnumerable<Listing> Items, int TotalCount)> SearchAsync(List<Filter> filters, int page, int pageSize, double? latitude = null, double? longitude = null) {
         var baseSql = @"
             SELECT 
                 listing_id as ListingId,
@@ -172,20 +181,21 @@ public class ListingRepository : IListingRepository {
         
         baseSql += " ORDER BY created_at DESC";
         
-        var offset = (page - 1) * pageSize;
-        parameters.Add("@PageSize", pageSize);
-        parameters.Add("@Offset", offset);
-        
-        var paginatedSql = baseSql + " LIMIT @PageSize OFFSET @Offset";
-        
         using var connection = CreateConnection();
         
-        var itemsTask = await connection.QueryAsync(paginatedSql, parameters);
+        var itemsTask = await connection.QueryAsync(baseSql, parameters);
         var totalCount = await connection.QuerySingleAsync<int>(countSql, parameters);
         
-        var items = itemsTask.Select(MapToListing);
+        var listings = itemsTask.Select(MapToListing);
         
-        return (items, totalCount);
+        // Apply sorting rules
+        var sortedListings = await _sortingService.ApplyAllSortingRulesAsync(listings, latitude, longitude);
+        
+        // Apply pagination after sorting
+        var offset = (page - 1) * pageSize;
+        var paginatedListings = sortedListings.Skip(offset).Take(pageSize);
+        
+        return (paginatedListings, totalCount);
     }
 
     private static void BuildWhereClause(List<Filter> filters, List<string> whereConditions, DynamicParameters parameters) {

@@ -18,13 +18,31 @@ public class ListingsController : ControllerBase {
     [HttpGet]
     [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(PaginatedListingsResponse))]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
-    public async Task<ActionResult<PaginatedListingsResponse>> GetListings([FromQuery] int page = 1, [FromQuery] int pageSize = 10) {
+    public async Task<ActionResult<PaginatedListingsResponse>> GetListings(
+        [FromQuery] int page = 1, 
+        [FromQuery] int pageSize = 10,
+        [FromQuery] double? latitude = null,
+        [FromQuery] double? longitude = null) {
 
         if (pageSize > 50) {
             return BadRequest("Page size cannot exceed 50 items");
         }
 
-        var listings = await _listingRepository.GetAllAsync(page, pageSize);
+        // Validate latitude and longitude if provided
+        if (latitude.HasValue && (latitude.Value < -90 || latitude.Value > 90)) {
+            return BadRequest("Latitude must be between -90 and 90 degrees");
+        }
+
+        if (longitude.HasValue && (longitude.Value < -180 || longitude.Value > 180)) {
+            return BadRequest("Longitude must be between -180 and 180 degrees");
+        }
+
+        // Both or neither latitude and longitude must be provided
+        if ((latitude.HasValue && !longitude.HasValue) || (!latitude.HasValue && longitude.HasValue)) {
+            return BadRequest("Both latitude and longitude must be provided together for proximity sorting");
+        }
+
+        var listings = await _listingRepository.GetAllAsync(page, pageSize, latitude, longitude);
         var totalItems = await _listingRepository.GetTotalCountAsync();
 
         var response = new PaginatedListingsResponse {
@@ -121,6 +139,21 @@ public class ListingsController : ControllerBase {
             return BadRequest("Page size cannot exceed 50 items");
         }
 
+        // Validate latitude and longitude if provided
+        if (filterRequest.Latitude.HasValue && (filterRequest.Latitude.Value < -90 || filterRequest.Latitude.Value > 90)) {
+            return BadRequest("Latitude must be between -90 and 90 degrees");
+        }
+
+        if (filterRequest.Longitude.HasValue && (filterRequest.Longitude.Value < -180 || filterRequest.Longitude.Value > 180)) {
+            return BadRequest("Longitude must be between -180 and 180 degrees");
+        }
+
+        // Both or neither latitude and longitude must be provided
+        if ((filterRequest.Latitude.HasValue && !filterRequest.Longitude.HasValue) || 
+            (!filterRequest.Latitude.HasValue && filterRequest.Longitude.HasValue)) {
+            return BadRequest("Both latitude and longitude must be provided together for proximity sorting");
+        }
+
         // Validate filter operators and fields
         var validFields = new[] { "name", "description", "category", "location.country", "location.municipality" };
         var validOperators = new[] { "contains", "equals" };
@@ -140,7 +173,7 @@ public class ListingsController : ControllerBase {
             }
         }
 
-        var (items, totalCount) = await _listingRepository.SearchAsync(filterRequest.Filters, filterRequest.Page, filterRequest.PageSize);
+        var (items, totalCount) = await _listingRepository.SearchAsync(filterRequest.Filters, filterRequest.Page, filterRequest.PageSize, filterRequest.Latitude, filterRequest.Longitude);
 
         var response = new SearchResponse {
             Items = items,
