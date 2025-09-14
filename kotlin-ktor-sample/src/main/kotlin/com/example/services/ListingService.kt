@@ -7,17 +7,17 @@ import java.util.UUID
 
 class ListingService(private val listingRepository: IListingRepository) {
 
-    suspend fun createListing(listing: Listing): Listing {
-        return listingRepository.createAsync(listing)
+    fun createListing(listing: Listing): Listing {
+        return listingRepository.create(listing)
     }
 
-    suspend fun getListing(id: UUID): Listing? {
-        return listingRepository.getByIdAsync(id)
+    fun getListing(id: UUID): Listing? {
+        return listingRepository.getById(id)
     }
 
-    suspend fun getAllListings(page: Int, pageSize: Int): PaginatedListingsResponse {
-        val items = listingRepository.getAllAsync(page, pageSize)
-        val totalItems = listingRepository.getTotalCountAsync()
+    fun getAllListings(page: Int, pageSize: Int): PaginatedListingsResponse {
+        val items = listingRepository.getAll(page, pageSize)
+        val totalItems = listingRepository.getTotalCount()
         
         return PaginatedListingsResponse(
             items = items,
@@ -27,16 +27,16 @@ class ListingService(private val listingRepository: IListingRepository) {
         )
     }
 
-    suspend fun updateListing(id: UUID, listing: Listing): Listing? {
+    fun updateListing(id: UUID, listing: Listing): Listing? {
         val updatedListing = listing.copy(listingId = id)
-        return listingRepository.updateAsync(updatedListing)
+        return listingRepository.update(updatedListing)
     }
 
-    suspend fun deleteListing(id: UUID): Boolean {
-        return listingRepository.deleteAsync(id)
+    fun deleteListing(id: UUID): Boolean {
+        return listingRepository.delete(id)
     }
 
-    suspend fun listingExists(id: UUID): Boolean {
-        return listingRepository.existsAsync(id)
+    fun listingExists(id: UUID): Boolean {
+        return listingRepository.exists(id)
     }
 }

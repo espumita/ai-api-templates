@@ -3,15 +3,13 @@ package com.example.repositories
 import com.example.models.Listing
 import com.example.models.Price
 import com.example.models.Location
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.withContext
 import java.sql.*
 import java.util.UUID
 import javax.sql.DataSource
 
 class ListingRepository(private val dataSource: DataSource) : IListingRepository {
 
-    override suspend fun getAllAsync(page: Int, pageSize: Int): List<Listing> = withContext(Dispatchers.IO) {
+    override fun getAll(page: Int, pageSize: Int): List<Listing> {
         val sql = """
             SELECT 
                 listing_id,
@@ -28,7 +26,7 @@ class ListingRepository(private val dataSource: DataSource) : IListingRepository
             LIMIT ? OFFSET ?
         """.trimIndent()
 
-        dataSource.connection.use { connection ->
+        return dataSource.connection.use { connection ->
             connection.prepareStatement(sql).use { statement ->
                 val offset = (page - 1) * pageSize
                 statement.setInt(1, pageSize)
@@ -45,10 +43,10 @@ class ListingRepository(private val dataSource: DataSource) : IListingRepository
         }
     }
 
-    override suspend fun getTotalCountAsync(): Int = withContext(Dispatchers.IO) {
+    override fun getTotalCount(): Int {
         val sql = "SELECT COUNT(*) FROM listings"
         
-        dataSource.connection.use { connection ->
+        return dataSource.connection.use { connection ->
             connection.prepareStatement(sql).use { statement ->
                 statement.executeQuery().use { resultSet ->
                     resultSet.next()
@@ -58,7 +56,7 @@ class ListingRepository(private val dataSource: DataSource) : IListingRepository
         }
     }
 
-    override suspend fun getByIdAsync(id: UUID): Listing? = withContext(Dispatchers.IO) {
+    override fun getById(id: UUID): Listing? {
         val sql = """
             SELECT 
                 listing_id,
@@ -74,7 +72,7 @@ class ListingRepository(private val dataSource: DataSource) : IListingRepository
             WHERE listing_id = ?
         """.trimIndent()
 
-        dataSource.connection.use { connection ->
+        return dataSource.connection.use { connection ->
             connection.prepareStatement(sql).use { statement ->
                 statement.setObject(1, id)
                 
@@ -89,7 +87,7 @@ class ListingRepository(private val dataSource: DataSource) : IListingRepository
         }
     }
 
-    override suspend fun createAsync(listing: Listing): Listing = withContext(Dispatchers.IO) {
+    override fun create(listing: Listing): Listing {
         val sql = """
             INSERT INTO listings (
                 listing_id, name, description, price_currency, price_amount, 
@@ -115,10 +113,10 @@ class ListingRepository(private val dataSource: DataSource) : IListingRepository
             }
         }
 
-        newListing
+        return newListing
     }
 
-    override suspend fun updateAsync(listing: Listing): Listing? = withContext(Dispatchers.IO) {
+    override fun update(listing: Listing): Listing? {
         val sql = """
             UPDATE listings SET 
                 name = ?,
@@ -133,7 +131,7 @@ class ListingRepository(private val dataSource: DataSource) : IListingRepository
             WHERE listing_id = ?
         """.trimIndent()
 
-        dataSource.connection.use { connection ->
+        return dataSource.connection.use { connection ->
             connection.prepareStatement(sql).use { statement ->
                 statement.setString(1, listing.name)
                 statement.setString(2, listing.description)
@@ -151,10 +149,10 @@ class ListingRepository(private val dataSource: DataSource) : IListingRepository
         }
     }
 
-    override suspend fun deleteAsync(id: UUID): Boolean = withContext(Dispatchers.IO) {
+    override fun delete(id: UUID): Boolean {
         val sql = "DELETE FROM listings WHERE listing_id = ?"
         
-        dataSource.connection.use { connection ->
+        return dataSource.connection.use { connection ->
             connection.prepareStatement(sql).use { statement ->
                 statement.setObject(1, id)
                 val rowsAffected = statement.executeUpdate()
@@ -163,10 +161,10 @@ class ListingRepository(private val dataSource: DataSource) : IListingRepository
         }
     }
 
-    override suspend fun existsAsync(id: UUID): Boolean = withContext(Dispatchers.IO) {
+    override fun exists(id: UUID): Boolean {
         val sql = "SELECT COUNT(*) FROM listings WHERE listing_id = ?"
         
-        dataSource.connection.use { connection ->
+        return dataSource.connection.use { connection ->
             connection.prepareStatement(sql).use { statement ->
                 statement.setObject(1, id)
                 

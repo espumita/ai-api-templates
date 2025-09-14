@@ -4,11 +4,11 @@ import com.example.models.Listing
 import java.util.UUID
 
 interface IListingRepository {
-    suspend fun getAllAsync(page: Int, pageSize: Int): List<Listing>
-    suspend fun getTotalCountAsync(): Int
-    suspend fun getByIdAsync(id: UUID): Listing?
-    suspend fun createAsync(listing: Listing): Listing
-    suspend fun updateAsync(listing: Listing): Listing?
-    suspend fun deleteAsync(id: UUID): Boolean
-    suspend fun existsAsync(id: UUID): Boolean
+    fun getAll(page: Int, pageSize: Int): List<Listing>
+    fun getTotalCount(): Int
+    fun getById(id: UUID): Listing?
+    fun create(listing: Listing): Listing
+    fun update(listing: Listing): Listing?
+    fun delete(id: UUID): Boolean
+    fun exists(id: UUID): Boolean
 }

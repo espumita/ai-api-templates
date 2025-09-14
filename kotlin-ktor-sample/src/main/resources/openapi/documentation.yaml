@@ -4,7 +4,10 @@ info:
   description: "kotlin_ktor_sample API"
   version: "1.0.0"
 servers:
+  - url: "http://localhost:8080"
+    description: "Local development server"
   - url: "https://kotlin_ktor_sample"
+    description: "Docker container server"
 paths:
   /:
     get:
