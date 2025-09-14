@@ -38,7 +38,7 @@ Each implementation should provide the following endpoints with their respective
 2. **Get All Listings**
    - GET /api/listings
    - Returns all available listings
-   - Should support pagination and filtering
+   - Should support pagination
    - Response codes:
      - 200 OK: Successful response with listings
      - 400 Bad Request: Invalid page or pageSize parameters
@@ -64,6 +64,50 @@ Each implementation should provide the following endpoints with their respective
    - Response codes:
      - 204 No Content: Listing deleted successfully
      - 404 Not Found: Listing not found
+
+#### 2. Advanced Listing Search and Filtering
+
+The API should provide advanced search and filtering capabilities through a dedicated endpoint that allows clients to apply multiple filters with different operators to various fields.
+
+6. **Search and Filter Listings**
+   - POST /api/listings/search
+   - Returns filtered listings with pagination support
+   - Supports extensible filtering system with operators
+   - Response codes:
+     - 200 OK: Successful response with filtered results
+     - 400 Bad Request: Invalid filter criteria or operators
+
+**Filter Structure:**
+
+The filtering system uses a flexible structure where each filter consists of:
+- `field`: The property to filter on
+- `operator`: The comparison operator to apply
+- `value`: The value to compare against
+
+**Supported Filter Fields:**
+- `name`: Listing name
+- `description`: Listing description
+- `category`: Listing category (exact match)
+- `location.country`: Location country
+- `location.municipality`: Location municipality
+
+**Supported Operators:**
+- `contains`: Text contains substring (case-insensitive)
+
+**Filter Request Body Structure:**
+```json
+{
+  "filters": [
+    {
+      "field": "string",
+      "operator": "string",
+      "value": "any"
+    }
+  ],
+  "page": 1,
+  "pageSize": 10
+}
+```
 
 #### API Examples
 
@@ -206,6 +250,80 @@ curl -X DELETE http://localhost:8080/api/listings/123e4567-e89b-12d3-a456-426614
 ```
 Response (204 No Content)
 
+6. **Search and Filter Listings Examples**
+
+**Basic Text Search:**
+```bash
+curl -X POST http://localhost:8080/api/listings/search `
+  -H "Content-Type: application/json" `
+  -d '{
+    "filters": [
+      {
+        "field": "name",
+        "operator": "contains",
+        "value": "guitar"
+      }
+    ],
+    "page": 1,
+    "pageSize": 10
+  }'
+```
+
+**Multiple Filters with Price Range:**
+```bash
+curl -X POST http://localhost:8080/api/listings/search `
+  -H "Content-Type: application/json" `
+  -d '{
+    "filters": [
+      {
+        "field": "name",
+        "operator": "contains",
+        "value": "guitar"
+      },
+      {
+        "field": "category",
+        "operator": "equals",
+        "value": "Music"
+      }
+    ],
+    "page": 1,
+    "pageSize": 20
+  }'
+```
+
+**Filter Response (200 OK):**
+```json
+{
+  "items": [
+    {
+      "listingId": "123e4567-e89b-12d3-a456-426614174000",
+      "name": "Vintage Guitar",
+      "description": "1970s Fender Stratocaster in excellent condition",
+      "price": {
+        "currency": "USD",
+        "amount": 1299.99
+      },
+      "category": "Music",
+      "location": {
+        "country": "United States",
+        "municipality": "Austin",
+        "geohash": "dr5regw"
+      }
+    }
+  ],
+  "totalItems": 1,
+  "page": 1,
+  "pageSize": 10,
+  "appliedFilters": [
+    {
+      "field": "name",
+      "operator": "contains",
+      "value": "guitar"
+    }
+  ]
+}
+```
+
 ### Architecture and Data Persistence
 
 #### Data Persistence Layer
@@ -244,7 +362,7 @@ While not part of the initial implementation, consider designing the API with th
 
 - User authentication and authorization
 - Image upload support for listings
-- Search and filtering capabilities
+- Additional filter fields and operators as needed
 
 ## Getting Started
 
