@@ -5,8 +5,7 @@ var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 builder.Services.AddControllers()
-    .AddJsonOptions(options =>
-    {
+    .AddJsonOptions(options => {
         options.JsonSerializerOptions.Converters.Add(new System.Text.Json.Serialization.JsonStringEnumConverter());
     });
 
@@ -14,10 +13,8 @@ builder.Services.AddControllers()
 builder.Services.AddScoped<IListingRepository, ListingRepository>();
 
 builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddSwaggerGen(c =>
-{
-    c.SwaggerDoc("v1", new OpenApiInfo 
-    { 
+builder.Services.AddSwaggerGen(c => {
+    c.SwaggerDoc("v1", new OpenApiInfo { 
         Title = "Marketplace API", 
         Version = "v1",
         Description = "A simple marketplace API for managing product listings"

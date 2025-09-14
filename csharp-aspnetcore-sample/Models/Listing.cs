@@ -3,8 +3,7 @@ using System.Runtime.Serialization;
 
 namespace csharp_aspnetcore_sample.Models;
 
-public enum Category
-{
+public enum Category {
     [EnumMember(Value = "Electronics")]
     Electronics,
     [EnumMember(Value = "Fashion")]
@@ -37,8 +36,7 @@ public enum Category
     VideoGamesAndConsoles
 }
 
-public class Listing
-{
+public class Listing {
     public Guid ListingId { get; set; }
 
     [Required]
@@ -58,8 +56,7 @@ public class Listing
     public Location Location { get; set; } = new();
 }
 
-public class Price
-{
+public class Price {
     [Required]
     [StringLength(3, MinimumLength = 3)]
     public string Currency { get; set; } = string.Empty;
@@ -69,8 +66,7 @@ public class Price
     public decimal Amount { get; set; }
 }
 
-public class Location
-{
+public class Location {
     [Required]
     [StringLength(2, MinimumLength = 2, ErrorMessage = "Country must be a valid ISO 3166 2-character code")]
     public string Country { get; set; } = string.Empty;
@@ -83,23 +79,20 @@ public class Location
     public string Geohash { get; set; } = string.Empty;
 }
 
-public class PaginatedListingsResponse
-{
+public class PaginatedListingsResponse {
     public IEnumerable<Listing> Items { get; set; } = new List<Listing>();
     public int TotalItems { get; set; }
     public int Page { get; set; }
     public int PageSize { get; set; }
 }
 
-public class FilterRequest
-{
+public class FilterRequest {
     public List<Filter> Filters { get; set; } = new();
     public int Page { get; set; } = 1;
     public int PageSize { get; set; } = 10;
 }
 
-public class Filter
-{
+public class Filter {
     [Required]
     public string Field { get; set; } = string.Empty;
     
@@ -110,8 +103,7 @@ public class Filter
     public object Value { get; set; } = string.Empty;
 }
 
-public class SearchResponse
-{
+public class SearchResponse {
     public IEnumerable<Listing> Items { get; set; } = new List<Listing>();
     public int TotalItems { get; set; }
     public int Page { get; set; }

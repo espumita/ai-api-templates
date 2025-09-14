@@ -5,20 +5,17 @@ using Npgsql;
 
 namespace csharp_aspnetcore_sample.Repositories;
 
-public class ListingRepository : IListingRepository
-{
+public class ListingRepository : IListingRepository {
     private readonly string _connectionString;
 
-    public ListingRepository(IConfiguration configuration)
-    {
+    public ListingRepository(IConfiguration configuration) {
         _connectionString = configuration.GetConnectionString("DefaultConnection") 
             ?? throw new InvalidOperationException("Connection string 'DefaultConnection' not found.");
     }
 
     private IDbConnection CreateConnection() => new NpgsqlConnection(_connectionString);
 
-    public async Task<IEnumerable<Listing>> GetAllAsync(int page, int pageSize)
-    {
+    public async Task<IEnumerable<Listing>> GetAllAsync(int page, int pageSize) {
         const string sql = @"
             SELECT 
                 listing_id as ListingId,
@@ -42,16 +39,14 @@ public class ListingRepository : IListingRepository
         return result.Select(MapToListing);
     }
 
-    public async Task<int> GetTotalCountAsync()
-    {
+    public async Task<int> GetTotalCountAsync() {
         const string sql = "SELECT COUNT(*) FROM listings";
         
         using var connection = CreateConnection();
         return await connection.QuerySingleAsync<int>(sql);
     }
 
-    public async Task<Listing?> GetByIdAsync(Guid id)
-    {
+    public async Task<Listing?> GetByIdAsync(Guid id) {
         const string sql = @"
             SELECT 
                 listing_id as ListingId,
@@ -72,8 +67,7 @@ public class ListingRepository : IListingRepository
         return result != null ? MapToListing(result) : null;
     }
 
-    public async Task<Listing> CreateAsync(Listing listing)
-    {
+    public async Task<Listing> CreateAsync(Listing listing) {
         const string sql = @"
             INSERT INTO listings (
                 listing_id, name, description, price_currency, price_amount, 
@@ -86,8 +80,7 @@ public class ListingRepository : IListingRepository
         listing.ListingId = Guid.NewGuid();
 
         using var connection = CreateConnection();
-        await connection.ExecuteAsync(sql, new
-        {
+        await connection.ExecuteAsync(sql, new {
             ListingId = listing.ListingId,
             Name = listing.Name,
             Description = listing.Description,
@@ -102,8 +95,7 @@ public class ListingRepository : IListingRepository
         return listing;
     }
 
-    public async Task<Listing?> UpdateAsync(Listing listing)
-    {
+    public async Task<Listing?> UpdateAsync(Listing listing) {
         const string sql = @"
             UPDATE listings SET 
                 name = @Name,
@@ -118,8 +110,7 @@ public class ListingRepository : IListingRepository
             WHERE listing_id = @ListingId";
 
         using var connection = CreateConnection();
-        var rowsAffected = await connection.ExecuteAsync(sql, new
-        {
+        var rowsAffected = await connection.ExecuteAsync(sql, new {
             ListingId = listing.ListingId,
             Name = listing.Name,
             Description = listing.Description,
@@ -134,8 +125,7 @@ public class ListingRepository : IListingRepository
         return rowsAffected > 0 ? listing : null;
     }
 
-    public async Task<bool> DeleteAsync(Guid id)
-    {
+    public async Task<bool> DeleteAsync(Guid id) {
         const string sql = "DELETE FROM listings WHERE listing_id = @Id";
         
         using var connection = CreateConnection();
@@ -144,8 +134,7 @@ public class ListingRepository : IListingRepository
         return rowsAffected > 0;
     }
 
-    public async Task<bool> ExistsAsync(Guid id)
-    {
+    public async Task<bool> ExistsAsync(Guid id) {
         const string sql = "SELECT COUNT(*) FROM listings WHERE listing_id = @Id";
         
         using var connection = CreateConnection();
@@ -154,8 +143,7 @@ public class ListingRepository : IListingRepository
         return count > 0;
     }
 
-    public async Task<(IEnumerable<Listing> Items, int TotalCount)> SearchAsync(List<Filter> filters, int page, int pageSize)
-    {
+    public async Task<(IEnumerable<Listing> Items, int TotalCount)> SearchAsync(List<Filter> filters, int page, int pageSize) {
         var baseSql = @"
             SELECT 
                 listing_id as ListingId,
@@ -176,8 +164,7 @@ public class ListingRepository : IListingRepository
         
         BuildWhereClause(filters, whereConditions, parameters);
         
-        if (whereConditions.Count > 0)
-        {
+        if (whereConditions.Count > 0) {
             var whereClause = " WHERE " + string.Join(" AND ", whereConditions);
             baseSql += whereClause;
             countSql += whereClause;
@@ -201,50 +188,42 @@ public class ListingRepository : IListingRepository
         return (items, totalCount);
     }
 
-    private static void BuildWhereClause(List<Filter> filters, List<string> whereConditions, DynamicParameters parameters)
-    {
-        for (int i = 0; i < filters.Count; i++)
-        {
+    private static void BuildWhereClause(List<Filter> filters, List<string> whereConditions, DynamicParameters parameters) {
+        for (int i = 0; i < filters.Count; i++) {
             var filter = filters[i];
             var paramName = $"param{i}";
             
-            switch (filter.Field.ToLowerInvariant())
-            {
+            switch (filter.Field.ToLowerInvariant()) {
                 case "name":
-                    if (filter.Operator.ToLowerInvariant() == "contains")
-                    {
+                    if (filter.Operator.ToLowerInvariant() == "contains") {
                         whereConditions.Add($"LOWER(name) LIKE LOWER(@{paramName})");
                         parameters.Add($"@{paramName}", $"%{filter.Value}%");
                     }
                     break;
                     
                 case "description":
-                    if (filter.Operator.ToLowerInvariant() == "contains")
-                    {
+                    if (filter.Operator.ToLowerInvariant() == "contains") {
                         whereConditions.Add($"LOWER(description) LIKE LOWER(@{paramName})");
                         parameters.Add($"@{paramName}", $"%{filter.Value}%");
                     }
                     break;
                     
                 case "category":
-                    if (filter.Operator.ToLowerInvariant() == "equals")
-                    {
+                    if (filter.Operator.ToLowerInvariant() == "equals") {
                         whereConditions.Add($"category = @{paramName}");
                         parameters.Add($"@{paramName}", filter.Value.ToString());
                     }
                     break;
                     
                 case "location.country":
-                    if (filter.Operator.ToLowerInvariant() == "contains")
-                    {
+                    if (filter.Operator.ToLowerInvariant() == "contains") {
                         whereConditions.Add($"LOWER(location_country) LIKE LOWER(@{paramName})");
                         parameters.Add($"@{paramName}", $"%{filter.Value}%");
                     }
                     break;
                     
                 case "location.municipality":
-                    if (filter.Operator.ToLowerInvariant() == "contains")
-                    {
+                    if (filter.Operator.ToLowerInvariant() == "contains") {
                         whereConditions.Add($"LOWER(location_municipality) LIKE LOWER(@{paramName})");
                         parameters.Add($"@{paramName}", $"%{filter.Value}%");
                     }
@@ -253,24 +232,20 @@ public class ListingRepository : IListingRepository
         }
     }
 
-    private static Listing MapToListing(dynamic row)
-    {
+    private static Listing MapToListing(dynamic row) {
         var categoryString = (string)row.category;
         var category = Enum.Parse<Category>(categoryString.Replace(" & ", "And").Replace(" ", "").Replace(",", ""));
 
-        return new Listing
-        {
+        return new Listing {
             ListingId =(Guid)row.listingid,
             Name = (string)row.name,
             Description = (string)row.description,
-            Price = new Price
-            {
+            Price = new Price {
                 Currency = (string)row.currency,
                 Amount = (decimal)row.amount
             },
             Category = category,
-            Location = new Location
-            {
+            Location = new Location {
                 Country = (string)row.country,
                 Municipality = (string)row.municipality,
                 Geohash = (string)row.geohash

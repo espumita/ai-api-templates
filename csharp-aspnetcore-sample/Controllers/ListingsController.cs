@@ -7,12 +7,10 @@ namespace csharp_aspnetcore_sample.Controllers;
 
 [ApiController]
 [Route("api/[controller]")]
-public class ListingsController : ControllerBase
-{
+public class ListingsController : ControllerBase {
     private readonly IListingRepository _listingRepository;
 
-    public ListingsController(IListingRepository listingRepository)
-    {
+    public ListingsController(IListingRepository listingRepository) {
         _listingRepository = listingRepository;
     }
 
@@ -20,19 +18,16 @@ public class ListingsController : ControllerBase
     [HttpGet]
     [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(PaginatedListingsResponse))]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
-    public async Task<ActionResult<PaginatedListingsResponse>> GetListings([FromQuery] int page = 1, [FromQuery] int pageSize = 10)
-    {
+    public async Task<ActionResult<PaginatedListingsResponse>> GetListings([FromQuery] int page = 1, [FromQuery] int pageSize = 10) {
 
-        if (pageSize > 50)
-        {
+        if (pageSize > 50) {
             return BadRequest("Page size cannot exceed 50 items");
         }
 
         var listings = await _listingRepository.GetAllAsync(page, pageSize);
         var totalItems = await _listingRepository.GetTotalCountAsync();
 
-        var response = new PaginatedListingsResponse
-        {
+        var response = new PaginatedListingsResponse {
             Items = listings,
             TotalItems = totalItems,
             Page = page,
@@ -46,12 +41,10 @@ public class ListingsController : ControllerBase
     [HttpGet("{id}")]
     [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(Listing))]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
-    public async Task<ActionResult<Listing>> GetListing(Guid id)
-    {
+    public async Task<ActionResult<Listing>> GetListing(Guid id) {
         var listing = await _listingRepository.GetByIdAsync(id);
         
-        if (listing == null)
-        {
+        if (listing == null) {
             return NotFound();
         }
 
@@ -62,10 +55,8 @@ public class ListingsController : ControllerBase
     [HttpPost]
     [ProducesResponseType(StatusCodes.Status201Created, Type = typeof(Listing))]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
-    public async Task<ActionResult<Listing>> CreateListing(Listing listing)
-    {
-        if (!ModelState.IsValid)
-        {
+    public async Task<ActionResult<Listing>> CreateListing(Listing listing) {
+        if (!ModelState.IsValid) {
             return BadRequest(ModelState);
         }
 
@@ -82,27 +73,22 @@ public class ListingsController : ControllerBase
     [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(Listing))]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
-    public async Task<ActionResult<Listing>> UpdateListing(Guid id, Listing listing)
-    {
-        if (!ModelState.IsValid)
-        {
+    public async Task<ActionResult<Listing>> UpdateListing(Guid id, Listing listing) {
+        if (!ModelState.IsValid) {
             return BadRequest(ModelState);
         }
 
-        if (id != listing.ListingId)
-        {
+        if (id != listing.ListingId) {
             return BadRequest("The ID in the URL must match the ID in the request body");
         }
 
         var exists = await _listingRepository.ExistsAsync(id);
-        if (!exists)
-        {
+        if (!exists) {
             return NotFound();
         }
 
         var updatedListing = await _listingRepository.UpdateAsync(listing);
-        if (updatedListing == null)
-        {
+        if (updatedListing == null) {
             return NotFound();
         }
 
@@ -113,11 +99,9 @@ public class ListingsController : ControllerBase
     [HttpDelete("{id}")]
     [ProducesResponseType(StatusCodes.Status204NoContent)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
-    public async Task<IActionResult> DeleteListing(Guid id)
-    {
+    public async Task<IActionResult> DeleteListing(Guid id) {
         var deleted = await _listingRepository.DeleteAsync(id);
-        if (!deleted)
-        {
+        if (!deleted) {
             return NotFound();
         }
 
@@ -128,15 +112,12 @@ public class ListingsController : ControllerBase
     [HttpPost("search")]
     [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(SearchResponse))]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
-    public async Task<ActionResult<SearchResponse>> SearchListings([FromBody] FilterRequest filterRequest)
-    {
-        if (!ModelState.IsValid)
-        {
+    public async Task<ActionResult<SearchResponse>> SearchListings([FromBody] FilterRequest filterRequest) {
+        if (!ModelState.IsValid) {
             return BadRequest(ModelState);
         }
 
-        if (filterRequest.PageSize > 50)
-        {
+        if (filterRequest.PageSize > 50) {
             return BadRequest("Page size cannot exceed 50 items");
         }
 
@@ -144,29 +125,24 @@ public class ListingsController : ControllerBase
         var validFields = new[] { "name", "description", "category", "location.country", "location.municipality" };
         var validOperators = new[] { "contains", "equals" };
 
-        foreach (var filter in filterRequest.Filters)
-        {
-            if (!validFields.Contains(filter.Field.ToLowerInvariant()))
-            {
+        foreach (var filter in filterRequest.Filters) {
+            if (!validFields.Contains(filter.Field.ToLowerInvariant())) {
                 return BadRequest($"Invalid filter field: {filter.Field}. Valid fields are: {string.Join(", ", validFields)}");
             }
 
-            if (!validOperators.Contains(filter.Operator.ToLowerInvariant()))
-            {
+            if (!validOperators.Contains(filter.Operator.ToLowerInvariant())) {
                 return BadRequest($"Invalid filter operator: {filter.Operator}. Valid operators are: {string.Join(", ", validOperators)}");
             }
 
             // Special validation for category field - must use equals operator
-            if (filter.Field.ToLowerInvariant() == "category" && filter.Operator.ToLowerInvariant() != "equals")
-            {
+            if (filter.Field.ToLowerInvariant() == "category" && filter.Operator.ToLowerInvariant() != "equals") {
                 return BadRequest("Category field only supports 'equals' operator");
             }
         }
 
         var (items, totalCount) = await _listingRepository.SearchAsync(filterRequest.Filters, filterRequest.Page, filterRequest.PageSize);
 
-        var response = new SearchResponse
-        {
+        var response = new SearchResponse {
             Items = items,
             TotalItems = totalCount,
             Page = filterRequest.Page,

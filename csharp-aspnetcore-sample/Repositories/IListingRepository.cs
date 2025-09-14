@@ -2,8 +2,7 @@ using csharp_aspnetcore_sample.Models;
 
 namespace csharp_aspnetcore_sample.Repositories;
 
-public interface IListingRepository
-{
+public interface IListingRepository {
     Task<IEnumerable<Listing>> GetAllAsync(int page, int pageSize);
     Task<int> GetTotalCountAsync();
     Task<Listing?> GetByIdAsync(Guid id);
