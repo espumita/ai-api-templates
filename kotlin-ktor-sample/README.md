@@ -17,7 +17,7 @@ The application uses PostgreSQL for data persistence and shares the database sch
 #### Option 1: Using Shared Docker Compose (Recommended)
 1. Navigate to the root directory of the repository:
    ```bash
-   cd api-templates
+   cd ../
    ```
 2. Start the shared PostgreSQL service:
    ```bash
@@ -239,7 +239,7 @@ If the server starts successfully, you'll see the following output:
 ## Project Structure
 
 ```
-src/main/kotlin/
+kotlin-ktor-sample-api/src/main/kotlin/
 ├── Application.kt                    # Application entry point and configuration
 ├── Routing.kt                        # API route definitions
 └── com/example/

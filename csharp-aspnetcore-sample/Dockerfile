@@ -1,10 +1,10 @@
 # Build stage
 FROM mcr.microsoft.com/dotnet/sdk:9.0 AS build
 WORKDIR /src
-COPY . .
-RUN dotnet restore
-RUN dotnet build -c Release --no-restore -o /app/build
-RUN dotnet publish -c Release --no-build -o /app/publish /p:UseAppHost=false
+COPY csharp-aspnetcore-sample-api/ ./csharp-aspnetcore-sample-api/
+RUN dotnet restore ./csharp-aspnetcore-sample-api/csharp-aspnetcore-sample.csproj
+RUN dotnet build ./csharp-aspnetcore-sample-api/csharp-aspnetcore-sample.csproj -c Release --no-restore -o /app/build
+RUN dotnet publish ./csharp-aspnetcore-sample-api/csharp-aspnetcore-sample.csproj -c Release --no-build -o /app/publish /p:UseAppHost=false
 
 # Runtime stage
 FROM mcr.microsoft.com/dotnet/aspnet:9.0 AS final

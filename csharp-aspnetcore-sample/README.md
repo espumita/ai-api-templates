@@ -294,11 +294,11 @@ The API will be available at `http://localhost:8081`. You can access the Swagger
 
 ## Project Structure
 
-- `Controllers/` - API controllers
-- `Models/` - Data models and DTOs
-- `Repositories/` - Repository pattern implementation
-- `Properties/` - Launch settings and configuration
-- `Program.cs` - Application entry point and DI configuration
+- `csharp-aspnetcore-sample-api/Controllers/` - API controllers
+- `csharp-aspnetcore-sample-api/Models/` - Data models and DTOs
+- `csharp-aspnetcore-sample-api/Repositories/` - Repository pattern implementation
+- `csharp-aspnetcore-sample-api/Properties/` - Launch settings and configuration
+- `csharp-aspnetcore-sample-api/Program.cs` - Application entry point and DI configuration
 - `Dockerfile` - Docker configuration for containerization
 - `../database/` - Shared database schema and scripts (root level)
 - `../docker-compose.yml` - Shared PostgreSQL container setup (root level)
