@@ -1,13 +1,14 @@
-using Microsoft.OpenApi.Models;
+using System.Text.Json.Serialization;
 using csharp_aspnetcore_sample.Repositories;
 using csharp_aspnetcore_sample.Services;
+using Microsoft.OpenApi.Models;
 
-var builder = WebApplication.CreateBuilder(args);
+WebApplicationBuilder builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 builder.Services.AddControllers()
     .AddJsonOptions(options => {
-        options.JsonSerializerOptions.Converters.Add(new System.Text.Json.Serialization.JsonStringEnumConverter());
+        options.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter());
     });
 
 // Register repository
@@ -18,14 +19,15 @@ builder.Services.AddScoped<ISortingService, SortingService>();
 
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen(c => {
-    c.SwaggerDoc("v1", new OpenApiInfo { 
-        Title = "Marketplace API", 
-        Version = "v1",
-        Description = "A simple marketplace API for managing product listings"
-    });
+    c.SwaggerDoc("v1",
+        new OpenApiInfo {
+            Title = "Marketplace API",
+            Version = "v1",
+            Description = "A simple marketplace API for managing product listings"
+        });
 });
 
-var app = builder.Build();
+WebApplication app = builder.Build();
 
 // Configure the HTTP request pipeline.
 app.UseSwagger();
@@ -36,3 +38,7 @@ app.UseAuthorization();
 app.MapControllers();
 
 app.Run();
+
+// Make Program class accessible for testing
+public partial class Program {
+}

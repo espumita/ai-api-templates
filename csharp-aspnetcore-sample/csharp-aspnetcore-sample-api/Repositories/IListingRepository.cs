@@ -10,5 +10,7 @@ public interface IListingRepository {
     Task<Listing?> UpdateAsync(Listing listing);
     Task<bool> DeleteAsync(Guid id);
     Task<bool> ExistsAsync(Guid id);
-    Task<(IEnumerable<Listing> Items, int TotalCount)> SearchAsync(List<Filter> filters, int page, int pageSize, double? latitude = null, double? longitude = null);
+
+    Task<(IEnumerable<Listing> Items, int TotalCount)> SearchAsync(List<Filter> filters, int page, int pageSize,
+        double? latitude = null, double? longitude = null);
 }

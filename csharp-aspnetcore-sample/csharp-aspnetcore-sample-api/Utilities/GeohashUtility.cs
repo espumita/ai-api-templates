@@ -31,18 +31,22 @@ public static class GeohashUtility {
                     double mid = (lonRange[0] + lonRange[1]) / 2;
                     if (bit == 1) {
                         lonRange[0] = mid;
-                    } else {
+                    }
+                    else {
                         lonRange[1] = mid;
                     }
-                } else {
+                }
+                else {
                     // latitude
                     double mid = (latRange[0] + latRange[1]) / 2;
                     if (bit == 1) {
                         latRange[0] = mid;
-                    } else {
+                    }
+                    else {
                         latRange[1] = mid;
                     }
                 }
+
                 isEvenBit = !isEvenBit;
             }
         }
@@ -58,7 +62,7 @@ public static class DistanceCalculator {
     private const double EarthRadiusKm = 6371.0;
 
     /// <summary>
-    /// Calculate the distance between two points on Earth using the Haversine formula
+    ///     Calculate the distance between two points on Earth using the Haversine formula
     /// </summary>
     /// <param name="lat1">Latitude of first point in degrees</param>
     /// <param name="lon1">Longitude of first point in degrees</param>
@@ -66,16 +70,16 @@ public static class DistanceCalculator {
     /// <param name="lon2">Longitude of second point in degrees</param>
     /// <returns>Distance in kilometers</returns>
     public static double CalculateDistanceKm(double lat1, double lon1, double lat2, double lon2) {
-        var lat1Rad = DegreesToRadians(lat1);
-        var lat2Rad = DegreesToRadians(lat2);
-        var deltaLatRad = DegreesToRadians(lat2 - lat1);
-        var deltaLonRad = DegreesToRadians(lon2 - lon1);
+        double lat1Rad = DegreesToRadians(lat1);
+        double lat2Rad = DegreesToRadians(lat2);
+        double deltaLatRad = DegreesToRadians(lat2 - lat1);
+        double deltaLonRad = DegreesToRadians(lon2 - lon1);
 
-        var a = Math.Sin(deltaLatRad / 2) * Math.Sin(deltaLatRad / 2) +
-                Math.Cos(lat1Rad) * Math.Cos(lat2Rad) *
-                Math.Sin(deltaLonRad / 2) * Math.Sin(deltaLonRad / 2);
+        double a = Math.Sin(deltaLatRad / 2) * Math.Sin(deltaLatRad / 2) +
+                   Math.Cos(lat1Rad) * Math.Cos(lat2Rad) *
+                   Math.Sin(deltaLonRad / 2) * Math.Sin(deltaLonRad / 2);
 
-        var c = 2 * Math.Atan2(Math.Sqrt(a), Math.Sqrt(1 - a));
+        double c = 2 * Math.Atan2(Math.Sqrt(a), Math.Sqrt(1 - a));
 
         return EarthRadiusKm * c;
     }

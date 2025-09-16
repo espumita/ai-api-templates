@@ -11,14 +11,13 @@ public class ListingRepository : IListingRepository {
     private readonly ISortingService _sortingService;
 
     public ListingRepository(IConfiguration configuration, ISortingService sortingService) {
-        _connectionString = configuration.GetConnectionString("DefaultConnection") 
-            ?? throw new InvalidOperationException("Connection string 'DefaultConnection' not found.");
+        _connectionString = configuration.GetConnectionString("DefaultConnection")
+                            ?? throw new InvalidOperationException("Connection string 'DefaultConnection' not found.");
         _sortingService = sortingService;
     }
 
-    private IDbConnection CreateConnection() => new NpgsqlConnection(_connectionString);
-
-    public async Task<IEnumerable<Listing>> GetAllAsync(int page, int pageSize, double? latitude = null, double? longitude = null) {
+    public async Task<IEnumerable<Listing>> GetAllAsync(int page, int pageSize, double? latitude = null,
+        double? longitude = null) {
         const string sql = @"
             SELECT 
                 listing_id as ListingId,
@@ -33,25 +32,26 @@ public class ListingRepository : IListingRepository {
             FROM listings 
             ORDER BY created_at DESC";
 
-        using var connection = CreateConnection();
-        
-        var result = await connection.QueryAsync(sql);
-        var listings = result.Select(MapToListing);
-        
+        using IDbConnection? connection = CreateConnection();
+
+        IEnumerable<dynamic>? result = await connection.QueryAsync(sql);
+        IEnumerable<Listing>? listings = result.Select(MapToListing);
+
         // Apply sorting rules
-        var sortedListings = await _sortingService.ApplyAllSortingRulesAsync(listings, latitude, longitude);
-        
+        IEnumerable<Listing>? sortedListings =
+            await _sortingService.ApplyAllSortingRulesAsync(listings, latitude, longitude);
+
         // Apply pagination after sorting
-        var offset = (page - 1) * pageSize;
-        var paginatedListings = sortedListings.Skip(offset).Take(pageSize);
-        
+        int offset = (page - 1) * pageSize;
+        IEnumerable<Listing>? paginatedListings = sortedListings.Skip(offset).Take(pageSize);
+
         return paginatedListings;
     }
 
     public async Task<int> GetTotalCountAsync() {
         const string sql = "SELECT COUNT(*) FROM listings";
-        
-        using var connection = CreateConnection();
+
+        using IDbConnection? connection = CreateConnection();
         return await connection.QuerySingleAsync<int>(sql);
     }
 
@@ -70,9 +70,9 @@ public class ListingRepository : IListingRepository {
             FROM listings 
             WHERE listing_id = @Id";
 
-        using var connection = CreateConnection();
-        var result = await connection.QuerySingleOrDefaultAsync(sql, new { Id = id });
-        
+        using IDbConnection? connection = CreateConnection();
+        dynamic? result = await connection.QuerySingleOrDefaultAsync(sql, new { Id = id });
+
         return result != null ? MapToListing(result) : null;
     }
 
@@ -88,18 +88,19 @@ public class ListingRepository : IListingRepository {
 
         listing.ListingId = Guid.NewGuid();
 
-        using var connection = CreateConnection();
-        await connection.ExecuteAsync(sql, new {
-            ListingId = listing.ListingId,
-            Name = listing.Name,
-            Description = listing.Description,
-            Currency = listing.Price.Currency,
-            Amount = listing.Price.Amount,
-            Category = listing.Category.ToString(),
-            Country = listing.Location.Country,
-            Municipality = listing.Location.Municipality,
-            Geohash = listing.Location.Geohash
-        });
+        using IDbConnection? connection = CreateConnection();
+        await connection.ExecuteAsync(sql,
+            new {
+                listing.ListingId,
+                listing.Name,
+                listing.Description,
+                listing.Price.Currency,
+                listing.Price.Amount,
+                Category = listing.Category.ToString(),
+                listing.Location.Country,
+                listing.Location.Municipality,
+                listing.Location.Geohash
+            });
 
         return listing;
     }
@@ -118,42 +119,44 @@ public class ListingRepository : IListingRepository {
                 updated_at = CURRENT_TIMESTAMP
             WHERE listing_id = @ListingId";
 
-        using var connection = CreateConnection();
-        var rowsAffected = await connection.ExecuteAsync(sql, new {
-            ListingId = listing.ListingId,
-            Name = listing.Name,
-            Description = listing.Description,
-            Currency = listing.Price.Currency,
-            Amount = listing.Price.Amount,
-            Category = listing.Category.ToString(),
-            Country = listing.Location.Country,
-            Municipality = listing.Location.Municipality,
-            Geohash = listing.Location.Geohash
-        });
+        using IDbConnection? connection = CreateConnection();
+        int rowsAffected = await connection.ExecuteAsync(sql,
+            new {
+                listing.ListingId,
+                listing.Name,
+                listing.Description,
+                listing.Price.Currency,
+                listing.Price.Amount,
+                Category = listing.Category.ToString(),
+                listing.Location.Country,
+                listing.Location.Municipality,
+                listing.Location.Geohash
+            });
 
         return rowsAffected > 0 ? listing : null;
     }
 
     public async Task<bool> DeleteAsync(Guid id) {
         const string sql = "DELETE FROM listings WHERE listing_id = @Id";
-        
-        using var connection = CreateConnection();
-        var rowsAffected = await connection.ExecuteAsync(sql, new { Id = id });
-        
+
+        using IDbConnection? connection = CreateConnection();
+        int rowsAffected = await connection.ExecuteAsync(sql, new { Id = id });
+
         return rowsAffected > 0;
     }
 
     public async Task<bool> ExistsAsync(Guid id) {
         const string sql = "SELECT COUNT(*) FROM listings WHERE listing_id = @Id";
-        
-        using var connection = CreateConnection();
-        var count = await connection.QuerySingleAsync<int>(sql, new { Id = id });
-        
+
+        using IDbConnection? connection = CreateConnection();
+        int count = await connection.QuerySingleAsync<int>(sql, new { Id = id });
+
         return count > 0;
     }
 
-    public async Task<(IEnumerable<Listing> Items, int TotalCount)> SearchAsync(List<Filter> filters, int page, int pageSize, double? latitude = null, double? longitude = null) {
-        var baseSql = @"
+    public async Task<(IEnumerable<Listing> Items, int TotalCount)> SearchAsync(List<Filter> filters, int page,
+        int pageSize, double? latitude = null, double? longitude = null) {
+        string baseSql = @"
             SELECT 
                 listing_id as ListingId,
                 name as Name,
@@ -166,99 +169,106 @@ public class ListingRepository : IListingRepository {
                 location_geohash as Geohash
             FROM listings";
 
-        var countSql = "SELECT COUNT(*) FROM listings";
-        
+        string countSql = "SELECT COUNT(*) FROM listings";
+
         var whereConditions = new List<string>();
         var parameters = new DynamicParameters();
-        
+
         BuildWhereClause(filters, whereConditions, parameters);
-        
+
         if (whereConditions.Count > 0) {
-            var whereClause = " WHERE " + string.Join(" AND ", whereConditions);
+            string whereClause = " WHERE " + string.Join(" AND ", whereConditions);
             baseSql += whereClause;
             countSql += whereClause;
         }
-        
+
         baseSql += " ORDER BY created_at DESC";
-        
-        using var connection = CreateConnection();
-        
-        var itemsTask = await connection.QueryAsync(baseSql, parameters);
-        var totalCount = await connection.QuerySingleAsync<int>(countSql, parameters);
-        
-        var listings = itemsTask.Select(MapToListing);
-        
+
+        using IDbConnection connection = CreateConnection();
+
+        IEnumerable<dynamic> itemsTask = await connection.QueryAsync(baseSql, parameters);
+        int totalCount = await connection.QuerySingleAsync<int>(countSql, parameters);
+
+        IEnumerable<Listing> listings = itemsTask.Select(MapToListing);
+
         // Apply sorting rules
-        var sortedListings = await _sortingService.ApplyAllSortingRulesAsync(listings, latitude, longitude);
-        
+        IEnumerable<Listing> sortedListings =
+            await _sortingService.ApplyAllSortingRulesAsync(listings, latitude, longitude);
+
         // Apply pagination after sorting
-        var offset = (page - 1) * pageSize;
-        var paginatedListings = sortedListings.Skip(offset).Take(pageSize);
-        
+        int offset = (page - 1) * pageSize;
+        IEnumerable<Listing> paginatedListings = sortedListings.Skip(offset).Take(pageSize);
+
         return (paginatedListings, totalCount);
     }
 
-    private static void BuildWhereClause(List<Filter> filters, List<string> whereConditions, DynamicParameters parameters) {
+    private IDbConnection CreateConnection() {
+        return new NpgsqlConnection(_connectionString);
+    }
+
+    private static void BuildWhereClause(List<Filter> filters, List<string> whereConditions,
+        DynamicParameters parameters) {
         for (int i = 0; i < filters.Count; i++) {
-            var filter = filters[i];
-            var paramName = $"param{i}";
-            
+            Filter? filter = filters[i];
+            string? paramName = $"param{i}";
+
             switch (filter.Field.ToLowerInvariant()) {
                 case "name":
                     if (filter.Operator.ToLowerInvariant() == "contains") {
                         whereConditions.Add($"LOWER(name) LIKE LOWER(@{paramName})");
                         parameters.Add($"@{paramName}", $"%{filter.Value}%");
                     }
+
                     break;
-                    
+
                 case "description":
                     if (filter.Operator.ToLowerInvariant() == "contains") {
                         whereConditions.Add($"LOWER(description) LIKE LOWER(@{paramName})");
                         parameters.Add($"@{paramName}", $"%{filter.Value}%");
                     }
+
                     break;
-                    
+
                 case "category":
                     if (filter.Operator.ToLowerInvariant() == "equals") {
                         whereConditions.Add($"category = @{paramName}");
                         parameters.Add($"@{paramName}", filter.Value.ToString());
                     }
+
                     break;
-                    
+
                 case "location.country":
                     if (filter.Operator.ToLowerInvariant() == "contains") {
                         whereConditions.Add($"LOWER(location_country) LIKE LOWER(@{paramName})");
                         parameters.Add($"@{paramName}", $"%{filter.Value}%");
                     }
+
                     break;
-                    
+
                 case "location.municipality":
                     if (filter.Operator.ToLowerInvariant() == "contains") {
                         whereConditions.Add($"LOWER(location_municipality) LIKE LOWER(@{paramName})");
                         parameters.Add($"@{paramName}", $"%{filter.Value}%");
                     }
+
                     break;
             }
         }
     }
 
     private static Listing MapToListing(dynamic row) {
-        var categoryString = (string)row.category;
-        var category = Enum.Parse<Category>(categoryString.Replace(" & ", "And").Replace(" ", "").Replace(",", ""));
+        string? categoryString = (string)row.category;
+        Category category =
+            Enum.Parse<Category>(categoryString.Replace(" & ", "And").Replace(" ", "").Replace(",", ""));
 
         return new Listing {
-            ListingId =(Guid)row.listingid,
+            ListingId = (Guid)row.listingid,
             Name = (string)row.name,
             Description = (string)row.description,
-            Price = new Price {
-                Currency = (string)row.currency,
-                Amount = (decimal)row.amount
-            },
+            Price = new Price { Currency = (string)row.currency, Amount = (decimal)row.amount },
             Category = category,
             Location = new Location {
-                Country = (string)row.country,
-                Municipality = (string)row.municipality,
-                Geohash = (string)row.geohash
+                Country = (string)row.country, Municipality = (string)row.municipality, Geohash = (string)row.geohash
             }
         };
     }
