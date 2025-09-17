@@ -3,6 +3,7 @@ package com.example.services
 import com.example.models.Listing
 import com.example.utilities.DistanceCalculator
 import com.example.utilities.GeohashUtility
+import java.math.BigDecimal
 
 class SortingService : ISortingService {
     
@@ -38,7 +39,7 @@ class SortingService : ISortingService {
         // Rule 3: Placeholder for future sorting (currently no additional sorting)
         return listingsWithSortData
             .sortedWith(
-                compareBy<Triple<Listing, Double, Double>> { it.second } // Rule 1: Distance
+                compareBy<Triple<Listing, Double, BigDecimal>> { it.second } // Rule 1: Distance
                     .thenBy { it.third } // Rule 2: Price
                     // Rule 3: Placeholder - can add .thenBy() for future sorting criteria
             )

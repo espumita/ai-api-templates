@@ -7,22 +7,39 @@ import com.example.routes.listingRoutes
 import com.example.services.ListingService
 import com.example.services.ISortingService
 import com.example.services.SortingService
+import com.fasterxml.jackson.databind.SerializationFeature
+import com.fasterxml.jackson.module.kotlin.KotlinModule
+import io.ktor.http.*
 import io.ktor.serialization.jackson.*
 import io.ktor.server.application.*
 import io.ktor.server.plugins.contentnegotiation.*
 import io.ktor.server.plugins.cors.routing.*
 import io.ktor.server.plugins.openapi.*
+import io.ktor.server.plugins.statuspages.*
 import io.ktor.server.plugins.swagger.*
+import io.ktor.server.request.*
+import io.ktor.server.response.*
 import io.ktor.server.routing.*
-import io.ktor.http.*
-import io.ktor.server.engine.embeddedServer
-import io.ktor.server.netty.Netty
+import java.sql.SQLException
 
 fun main(args: Array<String>) {
     io.ktor.server.netty.EngineMain.main(args)
 }
 
 fun Application.module() {
+    // Configure error handling
+    install(StatusPages) {
+        exception<IllegalArgumentException> { call, cause ->
+            call.respond(HttpStatusCode.BadRequest, mapOf("error" to cause.message))
+        }
+        exception<SQLException> { call, cause ->
+            call.respond(HttpStatusCode.InternalServerError, mapOf("error" to "Database error occurred"))
+        }
+        exception<Throwable> { call, cause ->
+            call.respond(HttpStatusCode.InternalServerError, mapOf("error" to "An unexpected error occurred"))
+        }
+    }
+
     // Configure CORS
     install(CORS) {
         allowMethod(HttpMethod.Options)
@@ -40,10 +57,11 @@ fun Application.module() {
     // Configure JSON serialization
     install(ContentNegotiation) {
         jackson {
+            registerModule(KotlinModule.Builder().build())
             // Enable pretty printing for development
-            enable(com.fasterxml.jackson.databind.SerializationFeature.INDENT_OUTPUT)
+            enable(SerializationFeature.INDENT_OUTPUT)
             // Prevent failure on empty beans
-            disable(com.fasterxml.jackson.databind.SerializationFeature.FAIL_ON_EMPTY_BEANS)
+            disable(SerializationFeature.FAIL_ON_EMPTY_BEANS)
         }
     }
 

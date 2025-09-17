@@ -1,6 +1,6 @@
-# Kotlin Ktor Sample API
+# Kotlin Ktor Marketplace API
 
-This is a sample Ktor API project that demonstrates a marketplace listings service using Kotlin and the Ktor framework, with PostgreSQL database persistence.
+This is a Kotlin implementation of the marketplace API using Ktor framework, providing the same functionality as the C# ASP.NET Core version. It includes full CRUD operations, advanced search/filtering, proximity sorting, and comprehensive test coverage.
 
 ## Getting Started
 

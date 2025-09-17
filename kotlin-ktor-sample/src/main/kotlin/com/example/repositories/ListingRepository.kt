@@ -5,6 +5,7 @@ import com.example.models.Price
 import com.example.models.Location
 import com.example.models.SearchFilter
 import com.example.models.FilterOperator
+import java.math.BigDecimal
 import java.sql.*
 import java.util.UUID
 import javax.sql.DataSource
@@ -100,18 +101,25 @@ class ListingRepository(private val dataSource: DataSource) : IListingRepository
         val newListing = listing.copy(listingId = UUID.randomUUID())
 
         dataSource.connection.use { connection ->
-            connection.prepareStatement(sql).use { statement ->
-                statement.setObject(1, newListing.listingId)
-                statement.setString(2, newListing.name)
-                statement.setString(3, newListing.description)
-                statement.setString(4, newListing.price.currency)
-                statement.setDouble(5, newListing.price.amount)
-                statement.setString(6, newListing.category)
-                statement.setString(7, newListing.location.country)
-                statement.setString(8, newListing.location.municipality)
-                statement.setString(9, newListing.location.geohash)
-                
-                statement.executeUpdate()
+            connection.autoCommit = false
+            try {
+                connection.prepareStatement(sql).use { statement ->
+                    statement.setObject(1, newListing.listingId)
+                    statement.setString(2, newListing.name)
+                    statement.setString(3, newListing.description)
+                    statement.setString(4, newListing.price.currency)
+                    statement.setBigDecimal(5, newListing.price.amount)
+                    statement.setString(6, newListing.category)
+                    statement.setString(7, newListing.location.country)
+                    statement.setString(8, newListing.location.municipality)
+                    statement.setString(9, newListing.location.geohash)
+                    
+                    statement.executeUpdate()
+                }
+                connection.commit()
+            } catch (e: Exception) {
+                connection.rollback()
+                throw e
             }
         }
 
@@ -134,19 +142,26 @@ class ListingRepository(private val dataSource: DataSource) : IListingRepository
         """.trimIndent()
 
         return dataSource.connection.use { connection ->
-            connection.prepareStatement(sql).use { statement ->
-                statement.setString(1, listing.name)
-                statement.setString(2, listing.description)
-                statement.setString(3, listing.price.currency)
-                statement.setDouble(4, listing.price.amount)
-                statement.setString(5, listing.category)
-                statement.setString(6, listing.location.country)
-                statement.setString(7, listing.location.municipality)
-                statement.setString(8, listing.location.geohash)
-                statement.setObject(9, listing.listingId)
-                
-                val rowsAffected = statement.executeUpdate()
-                if (rowsAffected > 0) listing else null
+            connection.autoCommit = false
+            try {
+                connection.prepareStatement(sql).use { statement ->
+                    statement.setString(1, listing.name)
+                    statement.setString(2, listing.description)
+                    statement.setString(3, listing.price.currency)
+                    statement.setBigDecimal(4, listing.price.amount)
+                    statement.setString(5, listing.category)
+                    statement.setString(6, listing.location.country)
+                    statement.setString(7, listing.location.municipality)
+                    statement.setString(8, listing.location.geohash)
+                    statement.setObject(9, listing.listingId)
+                    
+                    val rowsAffected = statement.executeUpdate()
+                    connection.commit()
+                    if (rowsAffected > 0) listing else null
+                }
+            } catch (e: Exception) {
+                connection.rollback()
+                throw e
             }
         }
     }
@@ -155,10 +170,17 @@ class ListingRepository(private val dataSource: DataSource) : IListingRepository
         val sql = "DELETE FROM listings WHERE listing_id = ?"
         
         return dataSource.connection.use { connection ->
-            connection.prepareStatement(sql).use { statement ->
-                statement.setObject(1, id)
-                val rowsAffected = statement.executeUpdate()
-                rowsAffected > 0
+            connection.autoCommit = false
+            try {
+                connection.prepareStatement(sql).use { statement ->
+                    statement.setObject(1, id)
+                    val rowsAffected = statement.executeUpdate()
+                    connection.commit()
+                    rowsAffected > 0
+                }
+            } catch (e: Exception) {
+                connection.rollback()
+                throw e
             }
         }
     }
@@ -295,7 +317,7 @@ class ListingRepository(private val dataSource: DataSource) : IListingRepository
             description = resultSet.getString("description"),
             price = Price(
                 currency = resultSet.getString("price_currency"),
-                amount = resultSet.getDouble("price_amount")
+                amount = resultSet.getBigDecimal("price_amount")
             ),
             category = resultSet.getString("category"),
             location = Location(

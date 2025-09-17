@@ -1,6 +1,7 @@
 package com.example.database
 
-import org.postgresql.ds.PGSimpleDataSource
+import com.zaxxer.hikari.HikariConfig
+import com.zaxxer.hikari.HikariDataSource
 import javax.sql.DataSource
 
 object DatabaseConfig {
@@ -10,11 +11,24 @@ object DatabaseConfig {
         username: String = System.getenv("DATABASE_USERNAME") ?: "postgres", 
         password: String = System.getenv("DATABASE_PASSWORD") ?: "postgres"
     ): DataSource {
-        val dataSource = PGSimpleDataSource()
-        dataSource.setURL(url)
-        dataSource.user = username
-        dataSource.password = password
+        val config = HikariConfig().apply {
+            jdbcUrl = url
+            this.username = username
+            this.password = password
+            driverClassName = "org.postgresql.Driver"
+            
+            // Connection pool settings
+            maximumPoolSize = 20
+            minimumIdle = 5
+            connectionTimeout = 30000
+            idleTimeout = 600000
+            maxLifetime = 1800000
+            
+            // Connection validation
+            isAutoCommit = false
+            transactionIsolation = "TRANSACTION_READ_COMMITTED"
+        }
         
-        return dataSource
+        return HikariDataSource(config)
     }
 }
