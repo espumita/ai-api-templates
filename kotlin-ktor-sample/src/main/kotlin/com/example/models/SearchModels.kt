@@ -53,12 +53,28 @@ data class SearchFilter(
 data class SearchRequest(
     val filters: List<SearchFilter> = emptyList(),
     val page: Int = 1,
-    val pageSize: Int = 10
+    val pageSize: Int = 10,
+    val latitude: Double? = null,
+    val longitude: Double? = null
 ) {
     init {
         require(page >= 1) { "Page must be >= 1" }
         require(pageSize >= 1) { "Page size must be >= 1" }
         require(pageSize <= 50) { "Page size cannot exceed 50 items" }
+        
+        // Validate latitude and longitude if provided
+        if (latitude != null && (latitude < -90 || latitude > 90)) {
+            throw IllegalArgumentException("Latitude must be between -90 and 90 degrees")
+        }
+        
+        if (longitude != null && (longitude < -180 || longitude > 180)) {
+            throw IllegalArgumentException("Longitude must be between -180 and 180 degrees")
+        }
+        
+        // Both or neither latitude and longitude must be provided
+        if ((latitude != null && longitude == null) || (latitude == null && longitude != null)) {
+            throw IllegalArgumentException("Both latitude and longitude must be provided together for proximity sorting")
+        }
     }
 }
 

@@ -44,13 +44,32 @@ fun Route.listingRoutes(listingService: ListingService) {
             try {
                 val page = call.request.queryParameters["page"]?.toIntOrNull() ?: 1
                 val pageSize = call.request.queryParameters["pageSize"]?.toIntOrNull() ?: 10
+                val latitude = call.request.queryParameters["latitude"]?.toDoubleOrNull()
+                val longitude = call.request.queryParameters["longitude"]?.toDoubleOrNull()
                 
                 if (pageSize > 50) {
                     call.respond(HttpStatusCode.BadRequest, mapOf("error" to "Page size cannot exceed 50 items"))
                     return@get
                 }
                 
-                val listings = listingService.getAllListings(page, pageSize)
+                // Validate latitude and longitude if provided
+                if (latitude != null && (latitude < -90 || latitude > 90)) {
+                    call.respond(HttpStatusCode.BadRequest, mapOf("error" to "Latitude must be between -90 and 90 degrees"))
+                    return@get
+                }
+                
+                if (longitude != null && (longitude < -180 || longitude > 180)) {
+                    call.respond(HttpStatusCode.BadRequest, mapOf("error" to "Longitude must be between -180 and 180 degrees"))
+                    return@get
+                }
+                
+                // Both or neither latitude and longitude must be provided
+                if ((latitude != null && longitude == null) || (latitude == null && longitude != null)) {
+                    call.respond(HttpStatusCode.BadRequest, mapOf("error" to "Both latitude and longitude must be provided together for proximity sorting"))
+                    return@get
+                }
+                
+                val listings = listingService.getAllListings(page, pageSize, latitude, longitude)
                 call.respond(listings)
             } catch (e: Exception) {
                 call.respond(HttpStatusCode.InternalServerError, mapOf("error" to "Failed to retrieve listings"))

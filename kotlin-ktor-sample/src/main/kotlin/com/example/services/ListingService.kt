@@ -7,7 +7,10 @@ import com.example.models.SearchResponse
 import com.example.repositories.IListingRepository
 import java.util.UUID
 
-class ListingService(private val listingRepository: IListingRepository) {
+class ListingService(
+    private val listingRepository: IListingRepository,
+    private val sortingService: ISortingService
+) {
 
     fun createListing(listing: Listing): Listing {
         return listingRepository.create(listing)
@@ -17,12 +20,20 @@ class ListingService(private val listingRepository: IListingRepository) {
         return listingRepository.getById(id)
     }
 
-    fun getAllListings(page: Int, pageSize: Int): PaginatedListingsResponse {
+    suspend fun getAllListings(page: Int, pageSize: Int, latitude: Double? = null, longitude: Double? = null): PaginatedListingsResponse {
         val items = listingRepository.getAll(page, pageSize)
         val totalItems = listingRepository.getTotalCount()
         
+        // Apply sorting if location parameters are provided
+        val sortedItems = if (latitude != null && longitude != null) {
+            sortingService.applyAllSortingRules(items, latitude, longitude)
+        } else {
+            // Apply sorting without location (only price sorting)
+            sortingService.applyAllSortingRules(items, null, null)
+        }
+        
         return PaginatedListingsResponse(
-            items = items,
+            items = sortedItems,
             totalItems = totalItems,
             page = page,
             pageSize = pageSize
@@ -42,17 +53,24 @@ class ListingService(private val listingRepository: IListingRepository) {
         return listingRepository.exists(id)
     }
 
-    fun searchListings(searchRequest: SearchRequest): SearchResponse {
+    suspend fun searchListings(searchRequest: SearchRequest): SearchResponse {
         val items = listingRepository.searchListings(
             filters = searchRequest.filters,
             page = searchRequest.page,
             pageSize = searchRequest.pageSize
         )
         
+        // Apply sorting
+        val sortedItems = sortingService.applyAllSortingRules(
+            items, 
+            searchRequest.latitude, 
+            searchRequest.longitude
+        )
+        
         val totalItems = listingRepository.getSearchResultCount(searchRequest.filters)
         
         return SearchResponse(
-            items = items,
+            items = sortedItems,
             totalItems = totalItems,
             page = searchRequest.page,
             pageSize = searchRequest.pageSize,

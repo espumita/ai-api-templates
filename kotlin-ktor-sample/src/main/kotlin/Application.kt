@@ -5,6 +5,8 @@ import com.example.repositories.IListingRepository
 import com.example.repositories.ListingRepository
 import com.example.routes.listingRoutes
 import com.example.services.ListingService
+import com.example.services.ISortingService
+import com.example.services.SortingService
 import io.ktor.serialization.jackson.*
 import io.ktor.server.application.*
 import io.ktor.server.plugins.contentnegotiation.*
@@ -48,7 +50,8 @@ fun Application.module() {
     // Initialize database and services
     val dataSource = DatabaseConfig.createDataSource()
     val listingRepository: IListingRepository = ListingRepository(dataSource)
-    val listingService = ListingService(listingRepository)
+    val sortingService: ISortingService = SortingService()
+    val listingService = ListingService(listingRepository, sortingService)
 
     // Configure OpenAPI and Swagger
     routing {
