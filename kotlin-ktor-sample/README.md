@@ -236,6 +236,60 @@ If the server starts successfully, you'll see the following output:
 2024-12-04 14:32:45.682 [main] INFO  Application - Responding at http://0.0.0.0:8080
 ```
 
+## Testing
+
+The project includes comprehensive unit and integration tests to ensure API functionality and data integrity.
+
+### Running Tests
+
+**Run all tests:**
+```bash
+./gradlew test
+```
+
+**Run tests with detailed output:**
+```bash
+./gradlew test --info
+```
+
+**Run tests and generate coverage report:**
+```bash
+./gradlew test jacocoTestReport
+```
+
+**Run specific test class:**
+```bash
+./gradlew test --tests "com.example.ListingServiceTest"
+```
+
+**Run tests in continuous mode (watch for changes):**
+```bash
+./gradlew test --continuous
+```
+
+### Test Structure
+
+The test suite is organized into several categories:
+
+- **Unit Tests**: Test individual components in isolation
+- **Integration Tests**: Test API endpoints with real database interactions
+- **Repository Tests**: Test data access layer functionality
+- **Service Tests**: Test business logic components
+
+### Test Database
+
+Tests use a separate test database configuration to avoid interfering with development data. The test configuration automatically:
+- Sets up an in-memory H2 database for fast test execution
+- Initializes the database schema before each test suite
+- Cleans up data between test cases
+
+### Viewing Test Results
+
+After running tests, you can view detailed results:
+- **Console Output**: Basic pass/fail information
+- **HTML Report**: Open `build/reports/tests/test/index.html` in your browser
+- **Coverage Report**: Open `build/reports/jacoco/test/html/index.html` for code coverage analysis
+
 ## Project Structure
 
 ```

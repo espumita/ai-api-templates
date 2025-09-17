@@ -152,6 +152,87 @@ The API will be available at:
 - HTTPS: `https://localhost:5001`
 - Swagger UI: `https://localhost:5001/swagger`
 
+## Testing
+
+The project includes comprehensive unit and integration tests to ensure API functionality, data access, and business logic work correctly.
+
+### Running Tests
+
+**Run all tests:**
+```bash
+dotnet test
+```
+
+**Run tests with detailed output:**
+```bash
+dotnet test --verbosity normal
+```
+
+**Run tests and collect code coverage:**
+```bash
+dotnet test --collect:"XPlat Code Coverage"
+```
+
+**Run specific test project:**
+```bash
+dotnet test csharp-aspnetcore-sample-tests
+```
+
+**Run specific test class:**
+```bash
+dotnet test --filter "ClassName=ListingsControllerTests"
+```
+
+**Run specific test method:**
+```bash
+dotnet test --filter "MethodName=CreateListing_ValidListing_ReturnsCreatedResult"
+```
+
+**Run tests in watch mode (automatically re-run on file changes):**
+```bash
+dotnet watch test
+```
+
+### Test Structure
+
+The test suite is organized in the `csharp-aspnetcore-sample-tests` project with the following structure:
+
+- **Controllers/**: Tests for API controllers and HTTP endpoints
+- **Integration/**: End-to-end integration tests with real database
+- **Models/**: Tests for data model validation and behavior
+- **Repositories/**: Tests for data access layer functionality
+- **Services/**: Tests for business logic components
+- **Utilities/**: Tests for utility classes and helper methods
+
+### Test Categories
+
+- **Unit Tests**: Test individual components in isolation using mocking
+- **Integration Tests**: Test API endpoints with real database interactions
+- **Validation Tests**: Test model validation rules and constraints
+- **Repository Tests**: Test data access patterns and SQL operations
+
+### Test Database
+
+Integration tests use a separate test database to avoid interfering with development data:
+- Tests can be configured to use an in-memory database or a dedicated test PostgreSQL instance
+- Database schema is automatically created and cleaned up for each test run
+- Test data is isolated between test cases
+
+### Viewing Test Results
+
+After running tests, you can view results in multiple ways:
+- **Console Output**: Real-time test execution results
+- **Visual Studio Test Explorer**: If using Visual Studio IDE
+- **Coverage Reports**: Generated in `TestResults/` directory when using coverage collection
+- **Logs**: Test execution logs are available in the test output
+
+### Test Configuration
+
+Test configuration is managed through:
+- `appsettings.Test.json`: Test-specific configuration
+- Environment variables for CI/CD scenarios
+- Test fixtures for shared test data and setup
+
 ## API Endpoints
 
 ### Create Listing
@@ -231,14 +312,25 @@ The PostgreSQL schema includes:
 2. Modify the `Listing` model if needed
 3. Update repository interface and implementation
 4. Modify controller endpoints
-5. Test the changes
+5. Add or update tests for the new functionality
+6. Test the changes
 
-### Testing
+### Testing Best Practices
 
-You can test the API using:
+When developing new features:
+- Write unit tests for business logic components
+- Add integration tests for API endpoints
+- Test validation rules and edge cases
+- Ensure database operations work correctly
+- Verify error handling scenarios
+
+### Manual Testing
+
+You can manually test the API using:
 - Swagger UI at `/swagger`
 - Postman or similar tools
 - The provided `.http` file in VS Code
+- curl commands as shown in the API examples
 
 ## Production Deployment
 
