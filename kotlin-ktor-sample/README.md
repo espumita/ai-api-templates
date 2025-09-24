@@ -5,7 +5,7 @@ This is a Kotlin implementation of the marketplace API using Ktor framework, pro
 ## Getting Started
 
 ### Prerequisites
-- JDK 24 or later
+- JDK 25 or later
 - Gradle 9.0 or later (project uses 9.0.0 via wrapper)
 - PostgreSQL database
 - Docker (for containerized deployment)
